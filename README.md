@@ -37,13 +37,13 @@ Created by **X-F1REBALL-X**.
 ### Exploit / chain
 
 - TheFloW
+- Echo Stretch
 - Gezine
 - WhiteShadow
 - ufm42
 
-- Dr.Yenyen
-- ArabPixel
+
   
   
 - raw13g
-- Echo Stretch
+
