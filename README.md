@@ -27,3 +27,22 @@ PS4 jailbreak / HEN host UI by **X-F1REBALL-X**.
 ## Credits
 
 Created by **X-F1REBALL-X**.
+
+### HEN / GoldHEN
+
+- SiSTRo
+- ctn
+- Kameleon
+
+### Exploit / chain
+
+- TheFloW
+- Gezine
+- WhiteShadow
+- ufm42
+- Nathan Fargo
+- Dr.Yenyen
+- ArabPixel
+- MasterMaind
+- ABC
+- raw13g
