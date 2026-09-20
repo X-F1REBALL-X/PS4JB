@@ -39,12 +39,8 @@ function terse(s) {
 
 const SHOW_LOG = params.get("log") === "1";
 if (SHOW_LOG && document.body) document.body.className = "log";
-var uiSuccessLocked = false;
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
-  // Never downgrade a success screen if later cleanup thinks it failed.
-  if (uiSuccessLocked && !ok) return;
-  if (ok) uiSuccessLocked = true;
   document.body.className = ok ? "done" : "fail";
   var text = ok
     ? "Jailbreak completed successfully"
@@ -52,68 +48,18 @@ function finishUI(ok) {
   var sub = document.getElementById("brand-sub");
   if (sub) {
     sub.textContent = text;
-    sub.style.cssText =
-      "display:block;visibility:visible;color:#ffffff;" +
-      "font-size:22px;font-weight:700;margin:8px 0 0;" +
-      "letter-spacing:0.12em;text-shadow:0 0 10px rgba(255,255,255,0.35);"
+    sub.style.display = "block";
+    sub.style.visibility = "visible";
+    sub.style.color = "#ffffff";
   }
   var msg = document.getElementById("msg");
   if (msg) {
     msg.textContent = text;
-    msg.style.cssText =
-      "position:fixed;top:50%;left:0;right:0;transform:translateY(-50%);" +
-      "text-align:center;padding:0 24px;display:block;visibility:visible;" +
-      "opacity:1;color:#ffffff;z-index:9999;font-size:36px;font-weight:800;" +
-      "letter-spacing:0.04em;line-height:1.25;" +
-      "text-shadow:0 0 20px rgba(255,255,255,0.45);"
-  }
-  // Full-screen overlay with only inline styles so it survives CSS/cache
-  // glitches and later DOM tweaks after the payload starts.
-  var overlay = document.getElementById("result-overlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "result-overlay";
-    document.body.appendChild(overlay);
-  }
-  overlay.style.cssText =
-    "position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483647;" +
-    "display:block;background:rgba(0,0,0,0.55);pointer-events:none;"
-  var label = document.getElementById("result-overlay-label");
-  if (!label) {
-    label = document.createElement("div");
-    label.id = "result-overlay-label";
-    overlay.appendChild(label);
-  }
-  label.textContent = text;
-  label.style.cssText =
-    "position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);" +
-    "text-align:center;padding:0 28px;color:#ffffff;font-size:36px;" +
-    "font-weight:800;line-height:1.25;letter-spacing:0.04em;" +
-    "font-family:Segoe UI,system-ui,sans-serif;" +
-    "text-shadow:0 0 20px rgba(255,255,255,0.45);"
-  // Keep re-asserting the success screen briefly; GoldHEN/ps4debug can
-  // briefly thrash the page after the payload thread starts.
-  if (ok && !window.__ps4jbHoldUI) {
-    window.__ps4jbHoldUI = setInterval(function () {
-      try {
-        if (!document.getElementById("result-overlay")) {
-          finishUI(true);
-        } else {
-          var o = document.getElementById("result-overlay");
-          var l = document.getElementById("result-overlay-label");
-          if (o) o.style.display = "block";
-          if (l) {
-            l.textContent = "Jailbreak completed successfully";
-            l.style.display = "block";
-          }
-        }
-      } catch (eHold) {}
-    }, 400);
-    setTimeout(function () {
-      try {
-        if (window.__ps4jbHoldUI) clearInterval(window.__ps4jbHoldUI);
-      } catch (eClear) {}
-    }, 20000);
+    msg.style.display = "block";
+    msg.style.visibility = "visible";
+    msg.style.opacity = "1";
+    msg.style.color = "#ffffff";
+    msg.style.zIndex = "9999";
   }
 }
 function mark(tag, detail) {
@@ -3506,7 +3452,7 @@ let allDone = false,
         (allDone ? "" : "  INCOMPLETE"),
     );
     try {
-      finishUI(payloadRunning || uiSuccessLocked);
+      finishUI(payloadRunning);
     } catch (eUI) {}
   }
 })();
