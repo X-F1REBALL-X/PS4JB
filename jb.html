@@ -97,10 +97,6 @@
         text-shadow: 0 0 10px rgba(42, 159, 255, 0.35);
         margin: 0 0 10px;
       }
-      body.done #progress-wrap,
-      body.fail #progress-wrap,
-      body.done #progress-pct,
-      body.fail #progress-pct,
       body.log #progress-wrap,
       body.log #progress-pct {
         display: none;
@@ -230,9 +226,9 @@
         var finished = false;
         var t0 = Date.now();
         function paint(v) {
-          value = v;
           if (v < 0) v = 0;
           if (v > 100) v = 100;
+          value = v;
           bar.style.width = v + "%";
           pct.textContent = Math.floor(v) + "%";
         }
@@ -242,17 +238,28 @@
           try {
             clearInterval(timer);
           } catch (e) {}
-          paint(100);
           if (wrap) {
             wrap.style.borderColor = ok
-              ? "rgba(255,255,255,0.45)"
+              ? "rgba(255,255,255,0.55)"
               : "rgba(42,159,255,0.45)";
           }
-          // Hide shortly after the success/fail message is up.
-          setTimeout(function () {
-            if (wrap) wrap.style.display = "none";
-            if (pct) pct.style.display = "none";
-          }, 600);
+          // Smooth fill from current value to 100%, then hold so it is visible.
+          var from = value;
+          var start = Date.now();
+          var dur = 450;
+          var anim = setInterval(function () {
+            var t = (Date.now() - start) / dur;
+            if (t >= 1) {
+              clearInterval(anim);
+              paint(100);
+              setTimeout(function () {
+                if (wrap) wrap.style.display = "none";
+                if (pct) pct.style.display = "none";
+              }, 1600);
+              return;
+            }
+            paint(from + (100 - from) * t);
+          }, 30);
         }
         window.__ps4jbProgressComplete = complete;
         var timer = setInterval(function () {
@@ -266,15 +273,15 @@
             complete(false);
             return;
           }
-          // Ease toward ~90% while the exploit runs; snap to 100% on finish.
+          // Faster ease: ~70% by ~5s, ~90% by ~12s while waiting.
           var sec = (Date.now() - t0) / 1000;
-          var target = 90 * (1 - Math.exp(-sec / 16));
+          var target = 92 * (1 - Math.exp(-sec / 5.5));
           if (target > value) paint(target);
-        }, 120);
+        }, 80);
       })();
     </script>
     <script type="module">
-      import "./jb.js?v=17";
+      import "./jb.js?v=18";
     </script>
     <div id="foot">
       <b>Created by X-F1REBALL-X</b>
