@@ -10,113 +10,63 @@
         margin: 0;
         padding: 0;
         min-height: 100%;
-        background: #05070a;
-        color: #e8eef6;
+        background: #000;
+        color: #2a9fff;
         font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+      }
+      #bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: #000 url("ps4-bg.png") center center / cover no-repeat;
+      }
+      #bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.35) 0%,
+          rgba(0, 0, 0, 0.55) 45%,
+          rgba(0, 0, 0, 0.75) 100%
+        );
+      }
+      #brand,
+      #spin,
+      #msg,
+      #wrap,
+      #foot {
+        position: relative;
+        z-index: 1;
       }
       #brand {
         text-align: center;
-        padding: 18px 12px 6px;
+        padding: 22px 12px 6px;
         background: transparent;
         border: none;
       }
-      #ps4-anim {
-        width: 120px;
-        height: 120px;
-        margin: 0 auto 6px;
-        position: relative;
-      }
-      #ps4-anim svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-      .ps4-ring {
-        fill: none;
-        stroke: #2a9fff;
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-dasharray: 180;
-        stroke-dashoffset: 180;
-        animation: ringDraw 2.4s ease-in-out infinite;
-        transform-origin: 80px 80px;
-      }
-      .ps4-ring.r2 {
-        stroke: #7ec8ff;
-        stroke-width: 2;
-        opacity: 0.55;
-        animation-delay: 0.35s;
-        animation-duration: 2.8s;
-      }
-      .ps4-mark {
-        fill: #f2f6fb;
-        font-family: "Segoe UI", system-ui, sans-serif;
-        font-weight: 900;
-        font-size: 42px;
-        letter-spacing: 2px;
-        animation: ps4Pulse 2.4s ease-in-out infinite;
-      }
-      .ps4-bar {
-        fill: #2a9fff;
-        animation: barGlow 2.4s ease-in-out infinite;
-      }
-      @keyframes ringDraw {
-        0% {
-          stroke-dashoffset: 180;
-          opacity: 0.35;
-        }
-        45% {
-          stroke-dashoffset: 0;
-          opacity: 1;
-        }
-        70% {
-          stroke-dashoffset: 0;
-          opacity: 1;
-        }
-        100% {
-          stroke-dashoffset: -180;
-          opacity: 0.35;
-        }
-      }
-      @keyframes ps4Pulse {
-        0%,
-        100% {
-          opacity: 0.75;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
-      @keyframes barGlow {
-        0%,
-        100% {
-          opacity: 0.45;
-        }
-        50% {
-          opacity: 1;
-        }
-      }
       #brand-title {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
         letter-spacing: 0.28em;
         text-transform: uppercase;
-        color: #9eb0c4;
+        color: #2a9fff;
         margin: 0;
+        text-shadow: 0 0 18px rgba(42, 159, 255, 0.45);
       }
 
-      /* running: a spinner under the brand. jb.js sets body.done / body.fail / body.log. */
       #spin {
         position: fixed;
-        top: calc(50% + 36px);
+        top: calc(50% + 48px);
         left: 50%;
         width: 46px;
         height: 46px;
         margin: -23px 0 0 -23px;
-        border: 4px solid #1e2732;
+        border: 4px solid rgba(42, 159, 255, 0.2);
         border-top-color: #2a9fff;
         border-radius: 50%;
         animation: spin 0.9s linear infinite;
+        z-index: 2;
       }
       @keyframes spin {
         to {
@@ -133,7 +83,10 @@
         font-size: 18px;
         font-weight: 700;
         letter-spacing: 0.5px;
+        color: #2a9fff;
+        text-shadow: 0 0 18px rgba(42, 159, 255, 0.4);
         display: none;
+        z-index: 2;
       }
       #wrap {
         padding: 0;
@@ -153,7 +106,6 @@
         display: block;
       }
 
-      /* ?log=1 -- the full step log, styled like the landing. */
       body.log #spin,
       body.log #msg {
         display: none;
@@ -166,26 +118,28 @@
         font-size: 22px;
         font-weight: 700;
         margin: 0 0 8px;
+        color: #2a9fff;
       }
       body.log #out {
         display: block;
         white-space: pre-wrap;
         font: 12px/1.45 Consolas, monospace;
-        background: #11151b;
-        border: 1px solid #1e2732;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(42, 159, 255, 0.35);
         border-radius: 5px;
         padding: 10px 12px;
-        height: calc(100vh - 200px);
+        height: calc(100vh - 160px);
         overflow-y: auto;
+        color: #9ad2ff;
       }
       .ok {
-        color: #7fd0a0;
+        color: #5eb6ff;
       }
       .bad {
-        color: #d08a7f;
+        color: #5eb6ff;
       }
       .warn {
-        color: #d8c07f;
+        color: #2a9fff;
       }
       #foot {
         position: fixed;
@@ -194,27 +148,21 @@
         bottom: 10px;
         text-align: center;
         font-size: 12px;
-        color: #5c6672;
+        color: #2a9fff;
         letter-spacing: 0.08em;
         pointer-events: none;
         line-height: 1.5;
+        text-shadow: 0 0 12px rgba(42, 159, 255, 0.35);
       }
       #foot b {
-        color: #9eb0c4;
+        color: #2a9fff;
         font-weight: 600;
       }
     </style>
   </head>
   <body>
+    <div id="bg" aria-hidden="true"></div>
     <div id="brand">
-      <div id="ps4-anim" aria-hidden="true">
-        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-          <circle class="ps4-ring" cx="80" cy="80" r="58" />
-          <circle class="ps4-ring r2" cx="80" cy="80" r="68" />
-          <rect class="ps4-bar" x="46" y="108" width="68" height="5" rx="2.5" />
-          <text class="ps4-mark" x="80" y="88" text-anchor="middle">PS4</text>
-        </svg>
-      </div>
       <p id="brand-title">PS4JB</p>
     </div>
     <div id="spin"></div>
