@@ -40,10 +40,10 @@ Created by **X-F1REBALL-X**.
 - Gezine
 - WhiteShadow
 - ufm42
-- Nathan Fargo
+
 - Dr.Yenyen
 - ArabPixel
-- MasterMaind
-- ABC
+  
+  
 - raw13g
 - Echo Stretch
