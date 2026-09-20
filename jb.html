@@ -33,6 +33,7 @@
       }
       #brand,
       #spin,
+      #progress-wrap,
       #msg,
       #wrap,
       #foot {
@@ -65,6 +66,45 @@
         text-shadow: 0 0 18px rgba(42, 159, 255, 0.45);
       }
 
+      #progress-wrap {
+        position: relative;
+        z-index: 2;
+        width: 72%;
+        max-width: 420px;
+        margin: 28px auto 8px;
+        height: 14px;
+        border-radius: 8px;
+        background: rgba(0, 40, 80, 0.55);
+        border: 1px solid rgba(42, 159, 255, 0.45);
+        overflow: hidden;
+        box-shadow: 0 0 18px rgba(42, 159, 255, 0.2);
+      }
+      #progress-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #1464b4, #2a9fff, #7ec8ff);
+        box-shadow: 0 0 14px rgba(42, 159, 255, 0.55);
+      }
+      #progress-pct {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #9ad2ff;
+        text-shadow: 0 0 10px rgba(42, 159, 255, 0.35);
+        margin: 0 0 10px;
+      }
+      body.done #progress-wrap,
+      body.fail #progress-wrap,
+      body.done #progress-pct,
+      body.fail #progress-pct,
+      body.log #progress-wrap,
+      body.log #progress-pct {
+        display: none;
+      }
       #spin {
         display: none !important;
       }
@@ -170,14 +210,71 @@
       <p id="brand-title">PS4JB</p>
       <p id="brand-sub">Jailbreak in progress</p>
     </div>
+    <div id="progress-wrap" aria-hidden="true">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="progress-pct">0%</div>
     <div id="spin"></div>
     <div id="msg"></div>
     <div id="wrap">
       <div id="state"></div>
       <div id="out"></div>
     </div>
+    <script>
+      (function () {
+        var bar = document.getElementById("progress-bar");
+        var pct = document.getElementById("progress-pct");
+        var wrap = document.getElementById("progress-wrap");
+        if (!bar || !pct) return;
+        var value = 0;
+        var finished = false;
+        var t0 = Date.now();
+        function paint(v) {
+          value = v;
+          if (v < 0) v = 0;
+          if (v > 100) v = 100;
+          bar.style.width = v + "%";
+          pct.textContent = Math.floor(v) + "%";
+        }
+        function complete(ok) {
+          if (finished) return;
+          finished = true;
+          try {
+            clearInterval(timer);
+          } catch (e) {}
+          paint(100);
+          if (wrap) {
+            wrap.style.borderColor = ok
+              ? "rgba(255,255,255,0.45)"
+              : "rgba(42,159,255,0.45)";
+          }
+          // Hide shortly after the success/fail message is up.
+          setTimeout(function () {
+            if (wrap) wrap.style.display = "none";
+            if (pct) pct.style.display = "none";
+          }, 600);
+        }
+        window.__ps4jbProgressComplete = complete;
+        var timer = setInterval(function () {
+          if (finished) return;
+          var cls = document.body.className || "";
+          if (cls === "done") {
+            complete(true);
+            return;
+          }
+          if (cls === "fail") {
+            complete(false);
+            return;
+          }
+          // Ease toward ~90% while the exploit runs; snap to 100% on finish.
+          var sec = (Date.now() - t0) / 1000;
+          var target = 90 * (1 - Math.exp(-sec / 16));
+          if (target > value) paint(target);
+        }, 120);
+      })();
+    </script>
     <script type="module">
-      import "./jb.js?v=16";
+      import "./jb.js?v=17";
     </script>
     <div id="foot">
       <b>Created by X-F1REBALL-X</b>

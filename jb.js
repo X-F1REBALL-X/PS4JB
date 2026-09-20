@@ -42,6 +42,11 @@ if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
   document.body.className = ok ? "done" : "fail";
+  try {
+    if (typeof window.__ps4jbProgressComplete === "function") {
+      window.__ps4jbProgressComplete(!!ok);
+    }
+  } catch (eProg) {}
   var text = ok
     ? "Jailbreak completed successfully"
     : "Jailbreak failed - restart your console";
