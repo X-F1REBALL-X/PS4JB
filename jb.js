@@ -42,11 +42,24 @@ if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
   document.body.className = ok ? "done" : "fail";
+  var text = ok
+    ? "Jailbreak completed successfully"
+    : "Jailbreak failed - restart your console";
+  var sub = document.getElementById("brand-sub");
+  if (sub) {
+    sub.textContent = text;
+    sub.style.display = "block";
+    sub.style.visibility = "visible";
+    sub.style.color = "#ffffff";
+  }
   var msg = document.getElementById("msg");
   if (msg) {
-    msg.textContent = ok
-      ? "Jailbreak completed successfully"
-      : "Jailbreak failed - restart your console";
+    msg.textContent = text;
+    msg.style.display = "block";
+    msg.style.visibility = "visible";
+    msg.style.opacity = "1";
+    msg.style.color = "#ffffff";
+    msg.style.zIndex = "9999";
   }
 }
 function mark(tag, detail) {
@@ -3090,6 +3103,11 @@ let allDone = false,
                   );
                   plDone = rc === 0 && handle.hi >>> 0 > 0;
                   payloadRunning = plDone;
+                  if (plDone) {
+                    try {
+                      finishUI(true);
+                    } catch (eEarlyUI) {}
+                  }
                   mark(
                     "PAYLOAD-RUN",
                     "pthread_create=" + rc + " handle=" + handle,
