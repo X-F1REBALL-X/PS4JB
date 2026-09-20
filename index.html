@@ -24,7 +24,7 @@
     background:rgba(0,0,0,0.55);
     pointer-events:none;
   }
-  #brand, #wrap, #foot {
+  #brand, #wrap, #credits, #foot {
     position:relative; z-index:2;
   }
 
@@ -47,7 +47,7 @@
     text-shadow:0 0 18px rgba(42,159,255,.45);
   }
   #wrap {
-    padding:18px 20px 80px; max-width:520px; margin:0 auto;
+    padding:18px 20px 16px; max-width:520px; margin:0 auto;
     text-align:center;
   }
   #state {
@@ -82,6 +82,34 @@
   }
   #startBtn.show { display:inline-block; }
 
+  #credits {
+    position:relative; z-index:2;
+    max-width:640px; margin:8px auto 70px; padding:0 16px;
+    text-align:center;
+    font-size:11px; line-height:1.55;
+    color:#5eb6ff;
+    text-shadow:0 0 10px rgba(42,159,255,.25);
+  }
+  #credits .credits-heading {
+    margin:0 0 8px;
+    font-size:12px; font-weight:700;
+    letter-spacing:.2em; text-transform:uppercase;
+    color:#2a9fff;
+  }
+  #credits .credits-group {
+    margin:0 0 8px;
+  }
+  #credits .credits-label {
+    display:block;
+    margin:0 0 2px;
+    font-size:11px; font-weight:700;
+    letter-spacing:.08em;
+    color:#9ad2ff;
+  }
+  #credits .credits-names {
+    margin:0;
+    color:#5eb6ff;
+  }
   #foot {
     position:fixed; left:0; right:0; bottom:10px; text-align:center;
     font-size:12px; color:#2a9fff; letter-spacing:.08em;
@@ -292,6 +320,17 @@
     }
 })();
 </script>
+<div id="credits">
+  <p class="credits-heading">Credits</p>
+  <div class="credits-group">
+    <span class="credits-label">HEN / GoldHEN</span>
+    <p class="credits-names">SiSTRo · ctn · Kameleon</p>
+  </div>
+  <div class="credits-group">
+    <span class="credits-label">Exploit / chain</span>
+    <p class="credits-names">TheFloW · Gezine · WhiteShadow · ufm42 · Nathan Fargo · Dr.Yenyen · ArabPixel · MasterMaind · ABC · raw13g · Echo Stretch</p>
+  </div>
+</div>
 <div id="foot">
   <b>Created by X-F1REBALL-X</b>
 </div>
