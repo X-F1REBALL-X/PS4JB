@@ -223,13 +223,16 @@
     function go() {
         if (startBtn) startBtn.className = "";
         runCountdown(function () {
+            if (stateEl) stateEl.style.display = "";
             setState("loading...", "warn");
             location.replace(target);
         });
     }
 
     function waitForTap(msg, action) {
-        setState(msg, "warn");
+        // Prompt lives on the start button only (avoid duplicate big text).
+        setState("");
+        if (stateEl) stateEl.style.display = "none";
         if (startBtn) {
             startBtn.textContent = msg;
             startBtn.className = "show";
