@@ -13,15 +13,20 @@
     overflow-x:hidden;
   }
   #bg {
-    position:fixed; inset:0; z-index:0;
-    background:#000 url("ps4-bg.png") center center / cover no-repeat;
+    position:fixed; top:0; right:0; bottom:0; left:0; z-index:0;
+    background:#000 url("ps4-bg.png") center center no-repeat;
+    background-size:cover;
+    pointer-events:none;
   }
-  #bg::after {
+  #bg:after {
     content:"";
-    position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.75) 100%);
+    position:absolute; top:0; right:0; bottom:0; left:0;
+    background:rgba(0,0,0,0.55);
+    pointer-events:none;
   }
-  #brand, #wrap, #foot, #countdown { position:relative; z-index:1; }
+  #brand, #wrap, #foot {
+    position:relative; z-index:2;
+  }
   #brand {
     text-align:center; padding:28px 12px 8px;
     background:transparent; border:none;
@@ -47,22 +52,43 @@
   }
   #cache.cacheok { color:#5eb6ff; }
   .ok { color:#5eb6ff; } .bad { color:#5eb6ff; } .warn { color:#2a9fff; }
+
+  #startBtn {
+    display:none;
+    margin:22px auto 0;
+    padding:16px 28px;
+    min-width:220px;
+    border:2px solid #2a9fff;
+    border-radius:6px;
+    background:rgba(0,40,80,.65);
+    color:#2a9fff;
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-decoration:none;
+    cursor:pointer;
+    text-shadow:0 0 12px rgba(42,159,255,.45);
+    box-shadow:0 0 24px rgba(42,159,255,.25);
+  }
+  #startBtn.show { display:inline-block; }
+
   #foot {
     position:fixed; left:0; right:0; bottom:10px; text-align:center;
     font-size:12px; color:#2a9fff; letter-spacing:.08em;
     pointer-events:none; line-height:1.5;
     text-shadow:0 0 12px rgba(42,159,255,.35);
+    z-index:2;
   }
   #foot b { color:#2a9fff; font-weight:600; }
 
   #countdown {
     display:none;
-    position:fixed; inset:0; z-index:9999;
-    align-items:center; justify-content:center;
-    flex-direction:column;
+    position:fixed; top:0; right:0; bottom:0; left:0; z-index:9999;
+    text-align:center;
     background:rgba(0,0,0,.88);
+    padding-top:28%;
   }
-  #countdown.show { display:flex; }
+  #countdown.show { display:block; }
   #countdown-num {
     font-size:120px; font-weight:900; line-height:1;
     color:#2a9fff;
@@ -87,6 +113,7 @@
   <div id="state">detecting firmware...</div>
   <div id="det"></div>
   <div id="cache"></div>
+  <a id="startBtn" href="#">Press X to start</a>
 </div>
 
 <script>
@@ -94,16 +121,25 @@
     var stateEl = document.getElementById("state");
     var detEl = document.getElementById("det");
     var cacheEl = document.getElementById("cache");
+    var startBtn = document.getElementById("startBtn");
     function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
     function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
-    var params = new URLSearchParams(location.search);
 
-    // Firmwares this build has a MEASURED kernel table for. jb.js still runs its
-    // own kernel-table-present gate, so this is UX only -- an unlisted firmware
-    // can still be launched with a tap. KEEP IN SYNC with ps4_offsets.js: add a
-    // fwnum here in the SAME commit that fills that firmware's kernel RVAs.
-    // The PS4 reports its minor as two hex digits in the UA (13.52 -> minor 0x52).
-    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1 }; // all measured on hardware
+    // Avoid URLSearchParams (missing on older PS4 WebKit).
+    function getParam(name) {
+        var q = location.search || "";
+        if (q.charAt(0) === "?") q = q.substring(1);
+        var parts = q.split("&");
+        for (var i = 0; i < parts.length; i++) {
+            var kv = parts[i].split("=");
+            if (decodeURIComponent(kv[0]) === name) {
+                return kv.length > 1 ? decodeURIComponent(kv[1]) : "";
+            }
+        }
+        return null;
+    }
+
+    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1 };
 
     var key = null, fwnum = null;
     var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
@@ -114,13 +150,13 @@
         fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
     }
 
-    var forced = params.get("force") === "1";
+    var forced = getParam("force") === "1";
     var supported = forced || (fwnum !== null && SUPPORTED[fwnum] === 1);
     detEl.innerHTML = "firmware <b>" + (key || "unknown") + "</b>"
         + (supported ? " &middot; <b>supported</b>"
                      : " &middot; not in this build's kernel table");
 
-    var target = "jb.html" + location.search;
+    var target = "jb.html" + (location.search || "");
     function runCountdown(done) {
         var overlay = document.getElementById("countdown");
         var numEl = document.getElementById("countdown-num");
@@ -146,33 +182,49 @@
         }, 1000);
     }
     function go() {
+        if (startBtn) startBtn.className = "";
         runCountdown(function () {
-            setState("loading jailbreak...", "warn");
+            setState("loading...", "warn");
             location.replace(target);
         });
     }
 
     function waitForTap(msg, action) {
         setState(msg, "warn");
-        function fire() {
-            window.removeEventListener("click", fire);
-            window.removeEventListener("keydown", fire);
+        if (startBtn) {
+            startBtn.textContent = msg;
+            startBtn.className = "show";
+            try { startBtn.focus(); } catch (e) {}
+        }
+        var fired = false;
+        function fire(ev) {
+            if (fired) return;
+            fired = true;
+            if (ev && ev.preventDefault) ev.preventDefault();
+            window.removeEventListener("click", fire, false);
+            window.removeEventListener("keydown", fire, false);
+            window.removeEventListener("touchstart", fire, false);
+            if (startBtn) {
+                startBtn.onclick = null;
+                startBtn.className = "";
+            }
             action();
         }
-        window.addEventListener("click", fire);
-        window.addEventListener("keydown", fire);
+        window.addEventListener("click", fire, false);
+        window.addEventListener("keydown", fire, false);
+        window.addEventListener("touchstart", fire, false);
+        if (startBtn) {
+            startBtn.onclick = fire;
+        }
     }
 
-    // Off-target consoles are not launched automatically -- one tap still runs
-    // it, so a user-agent quirk on the real 13.52 console can never lock it out.
     if (!supported) {
-        setState("Press X to start", "warn");
         waitForTap("Press X to start", go);
         return;
     }
 
     var ac = window.applicationCache;
-    if (!ac || !document.documentElement.hasAttribute("manifest")) {
+    if (!ac || !document.documentElement.getAttribute("manifest")) {
         go();
     } else if (!navigator.onLine) {
         setCache("offline -- from cache", true);
@@ -183,10 +235,22 @@
     } else if (ac.status === ac.UPDATEREADY) {
         try { ac.swapCache(); } catch (e) {}
         setCache("update downloaded", true);
-        waitForTap("UPDATE READY -- press X or tap to reload & run",
-                   function () { location.reload(); });
+        waitForTap("Press X to start", function () { location.reload(); });
     } else {
         setCache("checking cache...");
+        var started = false;
+        function startOnce() {
+            if (started) return;
+            started = true;
+            go();
+        }
+        // Safety: never stay stuck on cache checking forever.
+        setTimeout(function () {
+            if (!started) {
+                setCache("cache timeout -- continue");
+                waitForTap("Press X to start", go);
+            }
+        }, 8000);
         ac.addEventListener("downloading",
             function () { setCache("caching for offline (first run)..."); }, false);
         ac.addEventListener("progress", function (e) {
@@ -195,25 +259,24 @@
         }, false);
         ac.addEventListener("cached", function () {
             setCache("cached for offline use", true);
-            waitForTap("CACHED (first run) -- press X or tap to run", go);
+            waitForTap("Press X to start", go);
         }, false);
         ac.addEventListener("updateready", function () {
             try { ac.swapCache(); } catch (e) {}
             setCache("update downloaded", true);
-            waitForTap("UPDATE READY -- press X or tap to reload & run",
-                       function () { location.reload(); });
+            waitForTap("Press X to start", function () { location.reload(); });
         }, false);
         ac.addEventListener("noupdate", function () {
             setCache("cached -- offline ready", true);
-            go();
+            startOnce();
         }, false);
         ac.addEventListener("error", function () {
             setCache("cache unavailable");
-            waitForTap("CACHE FAILED -- press X or tap to run anyway", go);
+            waitForTap("Press X to start", go);
         }, false);
         ac.addEventListener("obsolete", function () {
             setCache("cache obsolete");
-            waitForTap("CACHE OBSOLETE -- press X or tap to run", go);
+            waitForTap("Press X to start", go);
         }, false);
     }
 })();
