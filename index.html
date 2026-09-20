@@ -14,7 +14,7 @@
   }
   #bg {
     position:fixed; top:0; right:0; bottom:0; left:0; z-index:0;
-    background:#000 url("ps4-bg.png") center center no-repeat;
+    background:#000 url("ps-controller-bg.jpg") center center no-repeat;
     background-size:cover;
     pointer-events:none;
   }
@@ -26,6 +26,16 @@
   }
   #brand, #wrap, #foot {
     position:relative; z-index:2;
+  }
+
+  #logo {
+    display:block;
+    width:120px;
+    max-width:40vw;
+    height:auto;
+    margin:0 auto 12px;
+    border-radius:12px;
+    box-shadow:0 0 24px rgba(42,159,255,.35);
   }
   #brand {
     text-align:center; padding:28px 12px 8px;
@@ -107,6 +117,7 @@
   <div id="countdown-label">starting</div>
 </div>
 <div id="brand">
+  <img id="logo" src="ps-logo.jpg" alt="PlayStation">
   <p id="brand-title">PS4JB</p>
 </div>
 <div id="wrap">
@@ -282,7 +293,7 @@
 })();
 </script>
 <div id="foot">
-  <b>X-F1REBALL-X</b>
+  <b>Created by X-F1REBALL-X</b>
 </div>
 </body>
 </html>
