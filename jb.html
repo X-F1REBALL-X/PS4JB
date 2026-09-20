@@ -91,14 +91,24 @@
         display: none;
       }
 
-      body.done #spin {
-        display: none;
-      }
+      body.done #spin,
       body.fail #spin {
         display: none;
       }
+      body.done #brand-sub,
+      body.fail #brand-sub {
+        display: none;
+      }
+      body.done #msg,
       body.fail #msg {
         display: block;
+      }
+      body.done #msg {
+        color: #ffffff;
+        text-shadow: 0 0 14px rgba(255, 255, 255, 0.4);
+      }
+      body.fail #msg {
+        color: #2a9fff;
       }
 
       body.log #spin,
@@ -162,13 +172,13 @@
       <p id="brand-sub">Jailbreak in progress</p>
     </div>
     <div id="spin"></div>
-    <div id="msg">Restart your console</div>
+    <div id="msg"></div>
     <div id="wrap">
       <div id="state"></div>
       <div id="out"></div>
     </div>
     <script type="module">
-      import "./jb.js?v=10";
+      import "./jb.js?v=11";
     </script>
     <div id="foot">
       <b>Created by X-F1REBALL-X</b>

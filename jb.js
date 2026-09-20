@@ -42,6 +42,12 @@ if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
   document.body.className = ok ? "done" : "fail";
+  var msg = document.getElementById("msg");
+  if (msg) {
+    msg.textContent = ok
+      ? "Jailbreak completed successfully"
+      : "Jailbreak failed - restart your console";
+  }
 }
 function mark(tag, detail) {
   const raw = detail;
