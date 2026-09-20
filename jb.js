@@ -51,6 +51,8 @@ function finishUI(ok) {
     sub.style.display = "block";
     sub.style.visibility = "visible";
     sub.style.color = "#ffffff";
+    sub.style.fontSize = "22px";
+    sub.style.fontWeight = "700";
   }
   var msg = document.getElementById("msg");
   if (msg) {
@@ -60,6 +62,11 @@ function finishUI(ok) {
     msg.style.opacity = "1";
     msg.style.color = "#ffffff";
     msg.style.zIndex = "9999";
+    msg.style.fontSize = "36px";
+    msg.style.fontWeight = "800";
+    msg.style.letterSpacing = "0.04em";
+    msg.style.lineHeight = "1.25";
+    msg.style.padding = "0 24px";
   }
 }
 function mark(tag, detail) {
