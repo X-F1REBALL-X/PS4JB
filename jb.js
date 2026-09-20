@@ -47,6 +47,17 @@ function finishUI(ok) {
       window.__ps4jbProgressComplete(!!ok);
     }
   } catch (eProg) {}
+  try {
+    var bar = document.getElementById("progress-bar");
+    var pct = document.getElementById("progress-pct");
+    var wrap = document.getElementById("progress-wrap");
+    if (bar) bar.style.width = "100%";
+    if (pct) {
+      pct.textContent = "100%";
+      pct.style.display = "block";
+    }
+    if (wrap) wrap.style.display = "block";
+  } catch (eBar) {}
   var text = ok
     ? "Jailbreak completed successfully"
     : "Jailbreak failed - restart your console";

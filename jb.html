@@ -238,50 +238,38 @@
           try {
             clearInterval(timer);
           } catch (e) {}
+          // Set 100% immediately — PS4 WebKit often stalls timers after the payload.
+          paint(100);
           if (wrap) {
+            wrap.style.display = "block";
             wrap.style.borderColor = ok
               ? "rgba(255,255,255,0.55)"
               : "rgba(42,159,255,0.45)";
           }
-          // Smooth fill from current value to 100%, then hold so it is visible.
-          var from = value;
-          var start = Date.now();
-          var dur = 450;
-          var anim = setInterval(function () {
-            var t = (Date.now() - start) / dur;
-            if (t >= 1) {
-              clearInterval(anim);
-              paint(100);
-              setTimeout(function () {
-                if (wrap) wrap.style.display = "none";
-                if (pct) pct.style.display = "none";
-              }, 1600);
-              return;
-            }
-            paint(from + (100 - from) * t);
-          }, 30);
+          if (pct) pct.style.display = "block";
+          // Keep 100% on screen; do not depend on later timers to finish the fill.
         }
         window.__ps4jbProgressComplete = complete;
         var timer = setInterval(function () {
           if (finished) return;
           var cls = document.body.className || "";
-          if (cls === "done") {
+          if (cls.indexOf("done") !== -1) {
             complete(true);
             return;
           }
-          if (cls === "fail") {
+          if (cls.indexOf("fail") !== -1) {
             complete(false);
             return;
           }
-          // Faster ease: ~70% by ~5s, ~90% by ~12s while waiting.
+          // Reach ~85% by ~3s and ~95% by ~6s for typical fast jailbreaks.
           var sec = (Date.now() - t0) / 1000;
-          var target = 92 * (1 - Math.exp(-sec / 5.5));
+          var target = 96 * (1 - Math.exp(-sec / 2.2));
           if (target > value) paint(target);
-        }, 80);
+        }, 50);
       })();
     </script>
     <script type="module">
-      import "./jb.js?v=18";
+      import "./jb.js?v=19";
     </script>
     <div id="foot">
       <b>Created by X-F1REBALL-X</b>
