@@ -59,7 +59,7 @@ function finishUI(ok) {
     if (wrap) wrap.style.display = "block";
   } catch (eBar) {}
   var text = ok
-    ? "Jailbreak completed successfully"
+    ? "Jailbreak completed successfully. You can close the browser now."
     : "Jailbreak failed - restart your console";
   var sub = document.getElementById("brand-sub");
   if (sub) {
@@ -76,6 +76,10 @@ function finishUI(ok) {
     msg.style.opacity = "1";
     msg.style.color = "#ffffff";
     msg.style.zIndex = "9999";
+  }
+  if (ok) {
+    // PS4 browser usually ignores window.close(); message above is the reliable path.
+    try { window.close(); } catch (eClose) {}
   }
 }
 function mark(tag, detail) {
