@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="Accept-CH" content="Sec-CH-UA-Model, Sec-CH-UA-Platform-Version, Sec-CH-UA-Platform" />
     <title>PS4JB</title>
     <style>
       html,
@@ -198,6 +199,19 @@
         color: #2a9fff;
         font-weight: 600;
       }
+      body.device-blocked #progress-wrap,
+      body.device-blocked #progress-pct,
+      body.device-blocked #spin {
+        display: none !important;
+      }
+      #msg.blocked {
+        color: #ff6473;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        padding: 24px 16px;
+        text-shadow: 0 0 12px rgba(255, 100, 115, 0.35);
+      }
     </style>
   </head>
   <body>
@@ -216,8 +230,34 @@
       <div id="state"></div>
       <div id="out"></div>
     </div>
+    <script src="device.js?v=1"></script>
     <script>
       (function () {
+        var ua = navigator.userAgent || "";
+        if (!/PlayStation\s+4/i.test(ua)) {
+          document.body.className = "device-blocked";
+          var sub = document.getElementById("brand-sub");
+          var msg = document.getElementById("msg");
+          var wrap = document.getElementById("progress-wrap");
+          var pctEl = document.getElementById("progress-pct");
+          if (wrap) wrap.style.display = "none";
+          if (pctEl) pctEl.style.display = "none";
+          function showBlocked(device) {
+            var text = device + " — not supported";
+            if (sub) {
+              sub.textContent = text;
+              sub.style.color = "#ff6473";
+            }
+            if (msg) {
+              msg.textContent = text;
+              msg.className = "blocked";
+              msg.style.display = "block";
+            }
+          }
+          showBlocked(typeof detectDeviceFromUa === "function" ? detectDeviceFromUa(ua) : "Unknown device");
+          if (typeof resolveDeviceLabel === "function") resolveDeviceLabel(ua, showBlocked);
+          return;
+        }
         var bar = document.getElementById("progress-bar");
         var pct = document.getElementById("progress-pct");
         var wrap = document.getElementById("progress-wrap");
@@ -269,7 +309,9 @@
       })();
     </script>
     <script type="module">
-      import "./jb.js?v=19";
+      if (/PlayStation\s+4/i.test(navigator.userAgent || "")) {
+        import("./jb.js?v=19");
+      }
     </script>
     <div id="foot">
       <b>Created by X-F1REBALL-X</b>

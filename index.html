@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Accept-CH" content="Sec-CH-UA-Model, Sec-CH-UA-Platform-Version, Sec-CH-UA-Platform">
 <title>PS4JB</title>
 <style>
   html, body {
@@ -132,6 +133,16 @@
     color:#2a9fff;
     text-shadow:0 0 40px rgba(42,159,255,.55);
   }
+  #state.blocked {
+    color:#ff6473;
+    font-size:22px;
+    text-shadow:0 0 12px rgba(255,100,115,.35);
+  }
+  body.device-blocked #startBtn,
+  body.device-blocked #countdown,
+  body.device-blocked #cache,
+  body.device-blocked #det,
+  body.device-blocked #credits { display:none !important; }
   #countdown-label {
     margin-top:18px; font-size:14px; letter-spacing:.28em;
     text-transform:uppercase; color:#5eb6ff;
@@ -155,6 +166,7 @@
   <a id="startBtn" href="#">Press X to start</a>
 </div>
 
+<script src="device.js?v=1"></script>
 <script>
 (function () {
     var stateEl = document.getElementById("state");
@@ -192,8 +204,23 @@
     //   1100-1202 -> chains/slopkit/index.html       (Slopkit Lapse, untested here)
     //   1250-1300 -> chains/slopkit/index.html       (Slopkit Netctrl, untested here)
 
+    var ua = navigator.userAgent || "";
+    var isPs4 = /PlayStation\s+4/i.test(ua);
+    if (!isPs4) {
+        document.body.className = (document.body.className || "") + " device-blocked";
+        function showBlocked(device) {
+            setState(device + " — not supported", "blocked");
+            if (detEl) detEl.textContent = "";
+            if (cacheEl) cacheEl.textContent = "";
+            if (startBtn) startBtn.className = "";
+        }
+        showBlocked(typeof detectDeviceFromUa === "function" ? detectDeviceFromUa(ua) : "Unknown device");
+        if (typeof resolveDeviceLabel === "function") resolveDeviceLabel(ua, showBlocked);
+        return;
+    }
+
     var key = null, fwnum = null;
-    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
+    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(ua);
     if (m) {
         var ms = parseInt(m[2], 16).toString(16);
         if (ms.length < 2) ms = "0" + ms;
