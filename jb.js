@@ -77,11 +77,41 @@ function finishUI(ok) {
     msg.style.color = "#ffffff";
     msg.style.zIndex = "9999";
   }
+  try {
+    var meta = document.getElementById("jb-meta");
+    if (meta) {
+      var ua = navigator.userAgent || "";
+      var fwM = /PlayStation\s+4\s+(\d+)\.(\d+)/i.exec(ua);
+      var fw = null;
+      if (fwM) {
+        var minor = fwM[2];
+        if (minor.length === 1) minor = minor + "0";
+        fw = fwM[1] + "." + minor;
+      }
+      var elapsed =
+        typeof window.__ps4jbElapsedMs === "number"
+          ? window.__ps4jbElapsedMs
+          : typeof window.__ps4jbT0 === "number"
+            ? Date.now() - window.__ps4jbT0
+            : 0;
+      var sec = Math.max(0, Math.floor(elapsed / 1000));
+      var mm = Math.floor(sec / 60);
+      var rr = sec % 60;
+      var timeStr = mm > 0 ? mm + "m " + rr + "s" : rr + "s";
+      meta.textContent =
+        (fw ? "PlayStation 4 · FW " + fw : "PlayStation 4") +
+        " · " +
+        timeStr +
+        (ok ? " · done" : " · failed");
+      meta.style.display = "block";
+    }
+  } catch (eMeta) {}
   if (ok) {
     // PS4 browser usually ignores window.close(); message above is the reliable path.
     try { window.close(); } catch (eClose) {}
   }
 }
+
 function mark(tag, detail) {
   const raw = detail;
   detail = terse(detail);
