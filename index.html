@@ -265,6 +265,9 @@
     detEl.innerHTML = detBits;
 
     var target = (route ? route.target : "jb.html") + (location.search || "");
+    if (key) {
+        target += (target.indexOf("?") >= 0 ? "&" : "?") + "fw=" + encodeURIComponent(key);
+    }
     function runCountdown(done) {
         var overlay = document.getElementById("countdown");
         var numEl = document.getElementById("countdown-num");

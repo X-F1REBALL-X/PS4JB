@@ -86,6 +86,8 @@
         border-radius: 8px;
         background: linear-gradient(90deg, #1464b4, #2a9fff, #7ec8ff);
         box-shadow: 0 0 14px rgba(42, 159, 255, 0.55);
+        -webkit-transition: width 0.25s linear;
+        transition: width 0.25s linear;
       }
 
       #jb-meta {
@@ -295,18 +297,33 @@
         var finished = false;
         var t0 = Date.now();
         window.__ps4jbT0 = t0;
+        function getParam(name) {
+          try {
+            var q = (location.search || "").replace(/^\?/, "").split("&");
+            for (var i = 0; i < q.length; i++) {
+              var p = q[i].split("=");
+              if (decodeURIComponent(p[0] || "") === name) {
+                return decodeURIComponent((p[1] || "").replace(/\+/g, " "));
+              }
+            }
+          } catch (e) {}
+          return null;
+        }
         function fwFromUa(ua) {
-          var m = /PlayStation\s+4\s+(\d+)\.(\d+)/i.exec(ua || "");
+          // Match "PlayStation 4 13.52" and "PlayStation 4/13.52"
+          var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/i.exec(ua || "");
           if (!m) return null;
           var minor = m[2];
-          if (minor.length === 1) minor = minor + "0";
+          if (minor.length === 1) minor = "0" + minor;
           return m[1] + "." + minor;
         }
-        function deviceLabel(ua) {
-          var fw = fwFromUa(ua);
-          var base = "PlayStation 4";
-          return fw ? (base + " · FW " + fw) : base;
+        function resolveFw() {
+          var fromQ = getParam("fw");
+          if (fromQ && /^\d+\.\d+$/.test(fromQ)) return fromQ;
+          return fwFromUa(navigator.userAgent || "");
         }
+        var fwLabel = resolveFw();
+        window.__ps4jbFw = fwLabel;
         function fmtElapsed(ms) {
           var s = Math.max(0, Math.floor(ms / 1000));
           var m = Math.floor(s / 60);
@@ -316,7 +333,9 @@
         }
         function paintMeta(extra) {
           if (!meta) return;
-          var bits = [deviceLabel(navigator.userAgent || "")];
+          var bits = [];
+          // Show firmware version number (what user asked for), not just "PlayStation 4".
+          bits.push(fwLabel ? ("FW " + fwLabel) : "FW ?");
           bits.push(fmtElapsed(Date.now() - t0));
           if (extra) bits.push(extra);
           meta.textContent = bits.join(" · ");
@@ -326,13 +345,14 @@
           if (v < 0) v = 0;
           if (v > 100) v = 100;
           value = v;
-          bar.style.width = v + "%";
+          bar.style.width = v.toFixed(1) + "%";
           pct.textContent = Math.floor(v) + "%";
           if (!finished) paintMeta();
         }
         function paintResultColors(ok) {
-          // Inline solid colors — more reliable than body.fail CSS on PS4 WebKit.
           if (bar) {
+            bar.style.webkitTransition = "none";
+            bar.style.transition = "none";
             bar.style.background = ok ? "#22c55e" : "#ef4444";
             bar.style.boxShadow = ok
               ? "0 0 14px rgba(34,197,94,0.7)"
@@ -355,7 +375,6 @@
         window.__ps4jbPaintResultColors = paintResultColors;
         function complete(ok) {
           if (finished) {
-            // Re-entry from finishUI: still force final colors.
             paintResultColors(!!ok);
             paintMeta(ok ? "done" : "failed");
             return;
@@ -368,6 +387,7 @@
           paintMeta(ok ? "done" : "failed");
         }
         window.__ps4jbProgressComplete = complete;
+        // Smooth ease toward asymptotic ~94%, then crawl — less jumpy than hard paint jumps.
         var timer = setInterval(function () {
           if (finished) return;
           var cls = document.body.className || "";
@@ -380,15 +400,21 @@
             return;
           }
           var sec = (Date.now() - t0) / 1000;
-          var target = 96 * (1 - Math.exp(-sec / 2.2));
-          if (target > value) paint(target);
-          else paintMeta();
-        }, 50);
+          // Reach ~70% by ~8s, ~90% by ~20s, approach 95% slowly (typical JB duration).
+          var target = 95 * (1 - Math.exp(-sec / 7.5));
+          if (target < 3) target = 3 * (sec / 1.5);
+          if (target > 95) target = 95;
+          // Ease current value toward target for smoother motion.
+          var next = value + (target - value) * 0.18;
+          if (next < value) next = value;
+          if (next - value < 0.05 && target > value) next = value + 0.05;
+          paint(next);
+        }, 40);
       })();
     </script>
     <script type="module">
       if (/PlayStation\s+4/i.test(navigator.userAgent || "")) {
-        import("./jb.js?v=21");
+        import("./jb.js?v=22");
       }
     </script>
     <div id="foot">

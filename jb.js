@@ -57,7 +57,6 @@ function finishUI(ok) {
       pct.style.display = "block";
     }
     if (wrap) wrap.style.display = "block";
-    // Force green/red even if complete() already ran (finished guard).
     if (typeof window.__ps4jbPaintResultColors === "function") {
       window.__ps4jbPaintResultColors(!!ok);
     } else if (bar) {
@@ -92,13 +91,25 @@ function finishUI(ok) {
   try {
     var meta = document.getElementById("jb-meta");
     if (meta) {
-      var ua = navigator.userAgent || "";
-      var fwM = /PlayStation\s+4\s+(\d+)\.(\d+)/i.exec(ua);
-      var fw = null;
-      if (fwM) {
-        var minor = fwM[2];
-        if (minor.length === 1) minor = minor + "0";
-        fw = fwM[1] + "." + minor;
+      var fw = window.__ps4jbFw || null;
+      if (!fw) {
+        var ua = navigator.userAgent || "";
+        var fwM = /PlayStation\s+4[\/ ](\d+)\.(\d+)/i.exec(ua);
+        if (fwM) {
+          var minor = fwM[2];
+          if (minor.length === 1) minor = "0" + minor;
+          fw = fwM[1] + "." + minor;
+        }
+        try {
+          var q = (location.search || "").replace(/^\?/, "").split("&");
+          for (var qi = 0; qi < q.length; qi++) {
+            var qp = q[qi].split("=");
+            if (decodeURIComponent(qp[0] || "") === "fw") {
+              var qv = decodeURIComponent((qp[1] || "").replace(/\+/g, " "));
+              if (/^\d+\.\d+$/.test(qv)) fw = qv;
+            }
+          }
+        } catch (eQ) {}
       }
       var elapsed =
         typeof window.__ps4jbElapsedMs === "number"
@@ -111,7 +122,7 @@ function finishUI(ok) {
       var rr = sec % 60;
       var timeStr = mm > 0 ? mm + "m " + rr + "s" : rr + "s";
       meta.textContent =
-        (fw ? "PlayStation 4 · FW " + fw : "PlayStation 4") +
+        (fw ? "FW " + fw : "FW ?") +
         " · " +
         timeStr +
         (ok ? " · done" : " · failed");
@@ -119,7 +130,6 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // PS4 browser usually ignores window.close(); message above is the reliable path.
     try { window.close(); } catch (eClose) {}
   }
 }
