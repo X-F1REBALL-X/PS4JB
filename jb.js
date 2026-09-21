@@ -57,6 +57,18 @@ function finishUI(ok) {
       pct.style.display = "block";
     }
     if (wrap) wrap.style.display = "block";
+    // Force green/red even if complete() already ran (finished guard).
+    if (typeof window.__ps4jbPaintResultColors === "function") {
+      window.__ps4jbPaintResultColors(!!ok);
+    } else if (bar) {
+      bar.style.background = ok ? "#22c55e" : "#ef4444";
+      if (wrap) {
+        wrap.style.borderColor = ok
+          ? "rgba(34,197,94,0.85)"
+          : "rgba(239,68,68,0.85)";
+      }
+      if (pct) pct.style.color = ok ? "#86efac" : "#fca5a5";
+    }
   } catch (eBar) {}
   var text = ok
     ? "Jailbreak completed successfully. You can close the browser now."
