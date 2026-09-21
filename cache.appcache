@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# rev 20260920-progress-100-sync
+# rev 20260921-multi-fw-phase1
 ps-logo.jpg #95cab1d70cad3e48fbf67a5de86ab368a908e46b81c5ee1f547414afb44abf84
 ps-controller-bg.jpg #d373feec02ff0f3dd6992b9f0d5b9c459c09cff64a615d5d558d78db33743fbf
 
@@ -22,6 +22,27 @@ patches/1350.bin #b9ab32fa10c272c341da97159a13818d98316b9998f3cf89d874e0b35e41cd
 patches/1352.bin #a4ca7dc1f31a342cd80cb3b4aee0fcd56e92685e3ce1491c34cbd656c1af562c
 core.js?v=10 #a76c52afbc19b05d176be2059048a3c6a4fb61db084d56434cef2b17da00b2b3
 jb.js?v=19 #a11499cb7571ad47886f974d7b350e02c5ede0364a519b17b470d8d3bed706ae
+
+# multi-fw phase 1
+NOTICE
+LICENSE
+chains/cssfontface/index.html
+chains/cssfontface/main.js
+chains/cssfontface/misc.js
+chains/cssfontface/loader.js
+chains/cssfontface/workers.js
+chains/cssfontface/worker.js
+chains/cssfontface/lapse.js
+chains/cssfontface/netctrl.js
+chains/cssfontface/ps4/constants.js
+chains/cssfontface/ps4/userland.js
+chains/cssfontface/ps4/kernel.js
+chains/psfree-lapse/index.html
+chains/psfree-lapse/bundle.js
+chains/slopkit/index.html
+chains/slopkit/chain_lapse.js
+chains/slopkit/chain_poops.js
+
 NETWORK:
 *
 

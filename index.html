@@ -146,7 +146,7 @@
 </div>
 <div id="brand">
   <p id="brand-title">PS4JB</p>
-  <p id="brand-sub">13.02  13.04  13.50  13.52</p>
+  <p id="brand-sub">7.00–11.02 &middot; 13.02–13.52</p>
 </div>
 <div id="wrap">
   <div id="state">detecting firmware...</div>
@@ -178,7 +178,19 @@
         return null;
     }
 
-    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1 };
+    // Firmware router (phase 1). fwnum = major*100 + minor (e.g. 9.00 -> 900, 13.52 -> 1352).
+    // Relapse 13.02-13.52 stays on existing jb.html. Lower FW -> chains/*.
+    var ROUTES = [
+        // CSSFontFace + Lapse (patches/constants present). Prefer for 7.00-11.02.
+        { min: 700, max: 1102, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
+        // Relapse (existing PS4JB / raw13g) — HW-proven for this host on listed FWs.
+        { min: 1302, max: 1352, target: "jb.html", label: "Relapse", proven: true,
+          only: { 1302: 1, 1304: 1, 1350: 1, 1352: 1 } }
+    ];
+    // Extra chains (wired entry present; not preferred default for overlapping ranges):
+    //   700-960  -> chains/psfree-lapse/index.html  (PSFree+Lapse, untested here)
+    //   1100-1202 -> chains/slopkit/index.html       (Slopkit Lapse, untested here)
+    //   1250-1300 -> chains/slopkit/index.html       (Slopkit Netctrl, untested here)
 
     var key = null, fwnum = null;
     var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
@@ -189,13 +201,37 @@
         fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
     }
 
-    var forced = getParam("force") === "1";
-    var supported = forced || (fwnum !== null && SUPPORTED[fwnum] === 1);
-    detEl.innerHTML = "firmware <b>" + (key || "unknown") + "</b>"
-        + (supported ? " &middot; <b>supported</b>"
-                     : " &middot; not in this build's kernel table");
+    function pickRoute(n) {
+        if (n === null) return null;
+        for (var i = 0; i < ROUTES.length; i++) {
+            var r = ROUTES[i];
+            if (n < r.min || n > r.max) continue;
+            if (r.only && !r.only[n]) continue;
+            return r;
+        }
+        return null;
+    }
 
-    var target = "jb.html" + (location.search || "");
+    var forced = getParam("force") === "1";
+    var forceChain = getParam("chain"); // cssfontface | psfree | slopkit | relapse
+    var route = pickRoute(fwnum);
+    if (forceChain === "cssfontface") route = { target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false };
+    else if (forceChain === "psfree") route = { target: "chains/psfree-lapse/index.html", label: "PSFree+Lapse", proven: false };
+    else if (forceChain === "slopkit") route = { target: "chains/slopkit/index.html", label: "Slopkit", proven: false };
+    else if (forceChain === "relapse") route = { target: "jb.html", label: "Relapse", proven: true };
+
+    var supported = forced || route !== null;
+    var detBits = "firmware <b>" + (key || "unknown") + "</b>";
+    if (route) {
+        detBits += " &middot; <b>" + route.label + "</b>";
+        if (!route.proven) detBits += " &middot; untested on this host";
+        else detBits += " &middot; <b>supported</b>";
+    } else {
+        detBits += " &middot; no chain for this FW in phase 1";
+    }
+    detEl.innerHTML = detBits;
+
+    var target = (route ? route.target : "jb.html") + (location.search || "");
     function runCountdown(done) {
         var overlay = document.getElementById("countdown");
         var numEl = document.getElementById("countdown-num");
@@ -331,7 +367,11 @@
   </div>
   <div class="credits-group">
     <span class="credits-label">Exploit / chain</span>
-    <p class="credits-names">TheFloW · Gezine · WhiteShadow · ufm42 · Nathan Fargo · Dr.Yenyen · ArabPixel · MasterMaind · ABC · raw13g · Echo Stretch</p>
+    <p class="credits-names">TheFloW · Gezine · WhiteShadow · ufm42 · Nathan Fargo · Dr.Yenyen · ArabPixel · MasterMaind · ABC · raw13g · Echo Stretch · anonymous (PSFree) · Fire30 · Sleirsgoevy</p>
+  </div>
+  <div class="credits-group">
+    <span class="credits-label">Hosts / assets</span>
+    <p class="credits-names">ArabPixel/WebKitty (AGPL-3.0) · ntfargo/CSSFontFace-Exploit · B4411M/all · DestoryG/CSSFontFace-DGHost</p>
   </div>
 </div>
 <div id="foot">
