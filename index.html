@@ -293,7 +293,7 @@
     }
 
     function waitForTap(msg, action) {
-        // Prompt lives on the start button only (avoid duplicate big text).
+        // Prompt on the start button. Only Cross (X) / Enter starts — not other keys.
         setState("");
         if (stateEl) stateEl.style.display = "none";
         if (startBtn) {
@@ -302,24 +302,42 @@
             try { startBtn.focus(); } catch (e) {}
         }
         var fired = false;
+        function isCrossKey(ev) {
+            if (!ev) return false;
+            var c = ev.keyCode || ev.which || 0;
+            var k = ev.key || "";
+            // PS4 browser maps controller Cross (X) to Enter.
+            return c === 13 || k === "Enter";
+        }
+        function cleanup() {
+            window.removeEventListener("keydown", onKey, true);
+            if (startBtn) {
+                startBtn.onclick = null;
+                startBtn.onkeydown = null;
+            }
+        }
         function fire(ev) {
             if (fired) return;
             fired = true;
             if (ev && ev.preventDefault) ev.preventDefault();
-            window.removeEventListener("click", fire, false);
-            window.removeEventListener("keydown", fire, false);
-            window.removeEventListener("touchstart", fire, false);
-            if (startBtn) {
-                startBtn.onclick = null;
-                startBtn.className = "";
-            }
+            cleanup();
+            if (startBtn) startBtn.className = "";
             action();
         }
-        window.addEventListener("click", fire, false);
-        window.addEventListener("keydown", fire, false);
-        window.addEventListener("touchstart", fire, false);
+        function onKey(ev) {
+            if (!isCrossKey(ev)) {
+                // Block other keys from starting the jailbreak.
+                if (ev.preventDefault) ev.preventDefault();
+                if (ev.stopPropagation) ev.stopPropagation();
+                return;
+            }
+            fire(ev);
+        }
+        // Capture phase so other handlers cannot start on random keys.
+        window.addEventListener("keydown", onKey, true);
         if (startBtn) {
-            startBtn.onclick = fire;
+            // Cross on a focused link also synthesizes click — allow only on the button.
+            startBtn.onclick = function (ev) { fire(ev); };
         }
     }
 
