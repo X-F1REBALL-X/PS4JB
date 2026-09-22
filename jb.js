@@ -95,8 +95,8 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Same as before the bar/close experiments: try close right away (no white page).
-    try { window.close(); } catch (eClose) {}
+    // Keep the page open so AppCache stays valid for offline reuse.
+    // Closing/navigating after JB can wipe the cache (white page next open).
   }
 }
 
