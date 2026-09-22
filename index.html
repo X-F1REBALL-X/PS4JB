@@ -114,8 +114,19 @@
     border-radius: 8px;
     background: linear-gradient(90deg, #e8e8e8, #ffffff, #f5f5f5);
     box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
-    -webkit-transition: width 0.18s linear, background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 0.18s linear, background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: background 0.35s ease, box-shadow 0.35s ease;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+  /* CSS-driven fill keeps moving even when exploit blocks the JS thread. */
+  #progress-bar.run {
+    width: 94% !important;
+    -webkit-transition: width 15s cubic-bezier(0.25, 0.08, 0.25, 1), background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 15s cubic-bezier(0.25, 0.08, 0.25, 1), background 0.35s ease, box-shadow 0.35s ease;
+  }
+  #progress-bar.finishing {
+    width: 100% !important;
+    -webkit-transition: width 0.9s ease-out, background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.9s ease-out, background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -385,10 +396,8 @@
     var bar = document.getElementById("progress-bar");
     var pct = document.getElementById("progress-pct");
     if (!bar || !pct) return;
-    var value = 0;
     var finished = false;
     var t0 = Date.now();
-    var lastTick = t0;
     var rafId = 0;
     var timer = 0;
     window.__ps4jbT0 = t0;
@@ -399,11 +408,16 @@
       s = s % 60;
       return m + ":" + (s < 10 ? "0" : "") + s;
     }
-    function paint(v) {
+    // Same curve as the 15s CSS fill (~88% at 15s, soft-cap 94%).
+    function pctForSec(sec) {
+      var v = 94 * (1 - Math.exp(-sec / 5.5));
+      if (v < 0) v = 0;
+      if (v > 94) v = 94;
+      return v;
+    }
+    function paintPct(v) {
       if (v < 0) v = 0;
       if (v > 100) v = 100;
-      value = v;
-      bar.style.width = v.toFixed(2) + "%";
       pct.textContent = Math.floor(v) + "%";
     }
     function paintElapsed(now) {
@@ -421,15 +435,18 @@
       }
       window.__ps4jbElapsedMs = Date.now() - t0;
     }
+    function startCssFill() {
+      try {
+        bar.className = "";
+        bar.style.width = "0%";
+        // Force layout so the 0% -> 94% transition actually runs.
+        void bar.offsetWidth;
+        bar.className = "run";
+      } catch (eCss) {}
+    }
     function tick() {
       if (finished) return;
       var now = Date.now();
-      var dt = (now - lastTick) / 1000;
-      if (dt < 0) dt = 0;
-      // Cap catch-up so a long main-thread stall does not snap the bar.
-      if (dt > 0.25) dt = 0.25;
-      lastTick = now;
-
       var cls = document.body.className || "";
       if (cls.indexOf("done") !== -1) {
         complete();
@@ -439,17 +456,9 @@
         fail();
         return;
       }
-
       var sec = (now - t0) / 1000;
-      // Same sjb curve (~10s to near-full, soft-cap ~94%).
-      var target = 94 * (1 - Math.exp(-sec / 5.5));
-      // Smooth chase — updates every frame so bar+clock move together.
-      var alpha = 1 - Math.exp(-dt / 0.28);
-      if (alpha < 0.08) alpha = 0.08;
-      if (alpha > 1) alpha = 1;
-      paint(value + (target - value) * alpha);
+      paintPct(pctForSec(sec));
       paintElapsed(now);
-
       if (sec > 180 && stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
         stageEl.className = "on bad";
@@ -470,16 +479,19 @@
       if (wrapBar) wrapBar.style.display = "block";
       if (pct) pct.style.display = "block";
       paintElapsed(Date.now());
-      var from = value;
+      try {
+        bar.className = "finishing";
+        bar.style.width = "100%";
+      } catch (eF) {}
       var start = Date.now();
+      var from = pctForSec((start - t0) / 1000);
       var anim = setInterval(function () {
         var p = Math.min(1, (Date.now() - start) / 900);
-        // ease-out for the final ramp
         var e = 1 - Math.pow(1 - p, 2);
-        paint(from + (100 - from) * e);
+        paintPct(from + (100 - from) * e);
         if (p >= 1) {
           try { clearInterval(anim); } catch (e3) {}
-          paint(100);
+          paintPct(100);
         }
       }, 30);
     }
@@ -493,13 +505,18 @@
         document.body.classList.remove("done");
         document.body.classList.add("fail");
       } catch (eB) {}
+      try {
+        bar.className = "finishing";
+        bar.style.width = "100%";
+      } catch (eF2) {}
       paintElapsed(Date.now());
-      paint(100);
+      paintPct(100);
     }
     window.__ps4jbProgressComplete = complete;
     window.__ps4jbProgressFail = fail;
-    paint(0);
+    paintPct(0);
     paintElapsed(t0);
+    startCssFill();
     if (typeof requestAnimationFrame === "function") {
       rafId = requestAnimationFrame(loop);
     } else {
