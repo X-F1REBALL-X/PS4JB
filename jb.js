@@ -60,7 +60,7 @@ function finishUI(ok) {
     }
   } catch (eProg) {}
   var text = ok
-    ? "Jailbreak completed successfully. You can close the browser now."
+    ? "Jailbreak completed successfully"
     : "Jailbreak failed - restart your console";
   var stage = document.getElementById("stage");
   if (stage) {
@@ -102,11 +102,11 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Delay close so the 100% bar + success text can paint before GoldHEN toast.
+    // Close only — no about:blank (avoids a white empty page on PS4).
     try {
       setTimeout(function () {
         try { window.close(); } catch (eClose) {}
-      }, 2500);
+      }, 1200);
     } catch (eDelay) {}
   }
 }
