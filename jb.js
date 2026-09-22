@@ -95,8 +95,8 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Keep the page open so AppCache stays valid for offline reuse.
-    // Closing/navigating after JB can wipe the cache (white page next open).
+    // Close the browser window/tab after success (PS4 may ignore; try anyway).
+    try { window.close(); } catch (eClose) {}
   }
 }
 
