@@ -62,16 +62,19 @@
   }
   #fwMeta {
     margin: 10px 0 0;
-    color: #9ad2ff;
-    font-size: 14px;
-    font-weight: 600;
+    color: #facc15;
+    font-size: 18px;
+    font-weight: 700;
     letter-spacing: 0.06em;
+    text-shadow: 0 0 12px rgba(250, 204, 21, 0.45);
   }
   #cache {
     margin: 8px 0 0;
-    font-size: 12px;
+    font-size: 17px;
+    font-weight: 600;
     color: #4a9fd8;
-    min-height: 14px;
+    min-height: 20px;
+    text-shadow: 0 0 10px rgba(74, 159, 216, 0.35);
   }
   #cache.cacheok { color: #5eb6ff; }
   #stage {
@@ -571,7 +574,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=33";
+    s.src = "jb.js?v=34";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
