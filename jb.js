@@ -41,55 +41,51 @@ const SHOW_LOG = params.get("log") === "1";
 if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
-  document.body.className = ok ? "done" : "fail";
   try {
-    if (typeof window.__ps4jbProgressComplete === "function") {
-      window.__ps4jbProgressComplete(!!ok);
+    document.body.classList.remove("done");
+    document.body.classList.remove("fail");
+    document.body.classList.add(ok ? "done" : "fail");
+  } catch (eCls) {
+    document.body.className = ok ? "done" : "fail";
+  }
+  try {
+    if (ok) {
+      if (typeof window.__ps4jbProgressComplete === "function") {
+        window.__ps4jbProgressComplete();
+      }
+    } else if (typeof window.__ps4jbProgressFail === "function") {
+      window.__ps4jbProgressFail();
+    } else if (typeof window.__ps4jbProgressComplete === "function") {
+      window.__ps4jbProgressComplete(false);
     }
   } catch (eProg) {}
-  try {
-    var bar = document.getElementById("progress-bar");
-    var pct = document.getElementById("progress-pct");
-    var wrap = document.getElementById("progress-wrap");
-    if (bar) bar.style.width = "100%";
-    if (pct) {
-      pct.textContent = "100%";
-      pct.style.display = "block";
-    }
-    if (wrap) wrap.style.display = "block";
-    if (typeof window.__ps4jbPaintResultColors === "function") {
-      window.__ps4jbPaintResultColors(!!ok);
-    } else if (bar) {
-      bar.style.background = ok ? "#22c55e" : "#ef4444";
-      if (wrap) {
-        wrap.style.borderColor = ok
-          ? "rgba(34,197,94,0.85)"
-          : "rgba(239,68,68,0.85)";
-      }
-      if (pct) pct.style.color = ok ? "#86efac" : "#fca5a5";
-    }
-  } catch (eBar) {}
   var text = ok
     ? "Jailbreak completed successfully. You can close the browser now."
     : "Jailbreak failed - restart your console";
+  var stage = document.getElementById("stage");
+  if (stage) {
+    stage.textContent = text;
+    stage.className = ok ? "ok" : "bad";
+    if (ok) stage.style.display = "none";
+  }
+  var successMsg = document.getElementById("successMsg");
+  if (successMsg) {
+    successMsg.style.display = ok ? "block" : "none";
+  }
   var sub = document.getElementById("brand-sub");
-  if (sub) {
+  if (sub && !stage) {
     sub.textContent = text;
     sub.style.display = "block";
-    sub.style.visibility = "visible";
     sub.style.color = "#ffffff";
   }
   var msg = document.getElementById("msg");
   if (msg) {
     msg.textContent = text;
-    msg.style.display = "block";
-    msg.style.visibility = "visible";
-    msg.style.opacity = "1";
+    msg.style.display = ok ? "none" : "block";
     msg.style.color = "#ffffff";
-    msg.style.zIndex = "9999";
   }
   try {
-    var meta = document.getElementById("jb-meta");
+    var meta = document.getElementById("fwMeta") || document.getElementById("jb-meta");
     if (meta) {
       var fw = window.__ps4jbFw || null;
       if (!fw) {
@@ -100,32 +96,8 @@ function finishUI(ok) {
           if (minor.length === 1) minor = "0" + minor;
           fw = fwM[1] + "." + minor;
         }
-        try {
-          var q = (location.search || "").replace(/^\?/, "").split("&");
-          for (var qi = 0; qi < q.length; qi++) {
-            var qp = q[qi].split("=");
-            if (decodeURIComponent(qp[0] || "") === "fw") {
-              var qv = decodeURIComponent((qp[1] || "").replace(/\+/g, " "));
-              if (/^\d+\.\d+$/.test(qv)) fw = qv;
-            }
-          }
-        } catch (eQ) {}
       }
-      var elapsed =
-        typeof window.__ps4jbElapsedMs === "number"
-          ? window.__ps4jbElapsedMs
-          : typeof window.__ps4jbT0 === "number"
-            ? Date.now() - window.__ps4jbT0
-            : 0;
-      var sec = Math.max(0, Math.floor(elapsed / 1000));
-      var mm = Math.floor(sec / 60);
-      var rr = sec % 60;
-      var timeStr = mm > 0 ? mm + "m " + rr + "s" : rr + "s";
-      meta.textContent =
-        (fw ? "FW " + fw : "FW ?") +
-        " · " +
-        timeStr +
-        (ok ? " · done" : " · failed");
+      if (fw) meta.textContent = "FW " + fw;
       meta.style.display = "block";
     }
   } catch (eMeta) {}
