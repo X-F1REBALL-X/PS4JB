@@ -442,9 +442,9 @@
 
       var sec = (now - t0) / 1000;
       // Same sjb curve (~10s to near-full, soft-cap ~94%).
-      var target = 94 * (1 - Math.exp(-sec / 4.2));
+      var target = 94 * (1 - Math.exp(-sec / 2.5));
       // Smooth chase — updates every frame so bar+clock move together.
-      var alpha = 1 - Math.exp(-dt / 0.32);
+      var alpha = 1 - Math.exp(-dt / 0.22);
       if (alpha < 0.08) alpha = 0.08;
       if (alpha > 1) alpha = 1;
       paint(value + (target - value) * alpha);
@@ -513,7 +513,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=23";
+    s.src = "jb.js?v=24";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
