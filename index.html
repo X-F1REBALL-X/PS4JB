@@ -120,13 +120,13 @@
   /* CSS-driven fill keeps moving even when exploit blocks the JS thread. */
   #progress-bar.run {
     width: 94% !important;
-    -webkit-transition: width 15s cubic-bezier(0.25, 0.08, 0.25, 1), background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 15s cubic-bezier(0.25, 0.08, 0.25, 1), background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 16s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 16s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-bar.finishing {
     width: 100% !important;
-    -webkit-transition: width 0.2s linear, background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 0.2s linear, background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 0.55s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.55s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -408,17 +408,37 @@
       s = s % 60;
       return m + ":" + (s < 10 ? "0" : "") + s;
     }
-    // Same curve as the 15s CSS fill (~88% at 15s, soft-cap 94%).
+    // Match ~16s CSS fill; soft-cap 94% until success.
     function pctForSec(sec) {
-      var v = 94 * (1 - Math.exp(-sec / 5.5));
+      var v = 94 * (1 - Math.exp(-sec / 5.8));
       if (v < 0) v = 0;
       if (v > 94) v = 94;
       return v;
     }
-    function paintPct(v) {
+    var shownPct = 0;
+    function readBarPct() {
+      try {
+        var wrap = bar.parentNode;
+        if (!wrap) return null;
+        var bw = bar.getBoundingClientRect().width;
+        var ww = wrap.getBoundingClientRect().width;
+        if (ww > 1) return (bw / ww) * 100;
+      } catch (eR) {}
+      return null;
+    }
+    function paintPct(v, snap) {
       if (v < 0) v = 0;
       if (v > 100) v = 100;
-      pct.textContent = Math.floor(v) + "%";
+      if (snap) {
+        shownPct = v;
+      } else {
+        // Soft chase so % does not jump after a JS stall.
+        var d = v - shownPct;
+        if (d > 8) shownPct += d * 0.35;
+        else if (d > 0.15) shownPct += d * 0.22;
+        else shownPct = v;
+      }
+      pct.textContent = Math.floor(shownPct + 0.0001) + "%";
     }
     function paintElapsed(now) {
       if (!elapsedEl) return;
@@ -457,7 +477,12 @@
         return;
       }
       var sec = (now - t0) / 1000;
-      paintPct(pctForSec(sec));
+      var target = pctForSec(sec);
+      var fromBar = readBarPct();
+      // Prefer live CSS bar width so % tracks the meter after stalls.
+      if (fromBar != null && fromBar > target) target = fromBar;
+      if (target > 94) target = 94;
+      paintPct(target, false);
       paintElapsed(now);
       if (sec > 180 && stageEl) {
         stageEl.textContent = "Jailbreak failed - refresh the page";
@@ -482,15 +507,34 @@
       if (pct) pct.style.display = "block";
       paintElapsed(Date.now());
       try {
-        bar.className = "finishing";
+        // Keep current computed width, then ease to 100% (no hard snap).
+        var cur = readBarPct();
+        if (cur == null || cur < shownPct) cur = shownPct;
+        if (cur < 1) cur = 1;
+        if (cur > 99) cur = 99;
+        bar.className = "";
         bar.style.webkitTransition = "none";
         bar.style.transition = "none";
-        bar.style.width = "100%";
+        bar.style.width = cur + "%";
         void bar.offsetWidth;
         bar.style.webkitTransition = "";
         bar.style.transition = "";
+        bar.className = "finishing";
       } catch (eF) {}
-      paintPct(100);
+      // Ramp % to 100 with the finishing bar.
+      var end0 = Date.now();
+      var startV = shownPct;
+      function rampDone() {
+        var u = (Date.now() - end0) / 550;
+        if (u >= 1) {
+          paintPct(100, true);
+          return;
+        }
+        paintPct(startV + (100 - startV) * u, true);
+        if (typeof requestAnimationFrame === "function") requestAnimationFrame(rampDone);
+        else setTimeout(rampDone, 32);
+      }
+      rampDone();
     }
     function fail() {
       if (finished) return;
@@ -507,11 +551,11 @@
         bar.style.width = "100%";
       } catch (eF2) {}
       paintElapsed(Date.now());
-      paintPct(100);
+      paintPct(100, true);
     }
     window.__ps4jbProgressComplete = complete;
     window.__ps4jbProgressFail = fail;
-    paintPct(0);
+    paintPct(0, true);
     paintElapsed(t0);
     startCssFill();
     if (typeof requestAnimationFrame === "function") {
@@ -527,7 +571,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=31";
+    s.src = "jb.js?v=32";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - refresh the page";
