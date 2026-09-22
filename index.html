@@ -125,8 +125,8 @@
   }
   #progress-bar.finishing {
     width: 100% !important;
-    -webkit-transition: width 0.9s ease-out, background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 0.9s ease-out, background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 0.2s linear, background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.2s linear, background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -481,19 +481,14 @@
       paintElapsed(Date.now());
       try {
         bar.className = "finishing";
+        bar.style.webkitTransition = "none";
+        bar.style.transition = "none";
         bar.style.width = "100%";
+        void bar.offsetWidth;
+        bar.style.webkitTransition = "";
+        bar.style.transition = "";
       } catch (eF) {}
-      var start = Date.now();
-      var from = pctForSec((start - t0) / 1000);
-      var anim = setInterval(function () {
-        var p = Math.min(1, (Date.now() - start) / 900);
-        var e = 1 - Math.pow(1 - p, 2);
-        paintPct(from + (100 - from) * e);
-        if (p >= 1) {
-          try { clearInterval(anim); } catch (e3) {}
-          paintPct(100);
-        }
-      }, 30);
+      paintPct(100);
     }
     function fail() {
       if (finished) return;
@@ -530,7 +525,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=24";
+    s.src = "jb.js?v=25";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
