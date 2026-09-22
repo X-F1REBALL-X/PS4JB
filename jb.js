@@ -102,14 +102,16 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Half-close: leave the JB page, stay in the browser app, and reset WebKit.
-    // window.close() alone is blocked on PS4; about:blank is the reliable exit.
+    // Leave right after success: no about:blank (no white page).
+    // Prefer history.back() so PS4 returns to the browser bookmark tiles.
     try {
       setTimeout(function () {
-        try { window.open("", "_self"); } catch (e1) {}
-        try { window.close(); } catch (e2) {}
-        try { location.replace("about:blank"); } catch (e3) {}
-      }, 1200);
+        try { window.close(); } catch (e1) {}
+        try {
+          if (history.length > 1) history.go(1 - history.length);
+          else history.back();
+        } catch (e2) {}
+      }, 100);
     } catch (eDelay) {}
   }
 }
@@ -3196,7 +3198,7 @@ let allDone = false,
                     if (stageEl2) stageEl2.style.display = "none";
                   } catch (ePreUi) {}
                   await new Promise(function (r) {
-                    setTimeout(r, 500);
+                    setTimeout(r, 200);
                   });
                   const rc = callAddr(expect, [thrAddr, 0, entry, 0]).i32;
                   const tdv = new DataView(thr);
