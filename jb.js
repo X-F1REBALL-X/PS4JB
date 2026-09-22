@@ -102,10 +102,13 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Close only — no about:blank (avoids a white empty page on PS4).
+    // Half-close: leave the JB page, stay in the browser app, and reset WebKit.
+    // window.close() alone is blocked on PS4; about:blank is the reliable exit.
     try {
       setTimeout(function () {
-        try { window.close(); } catch (eClose) {}
+        try { window.open("", "_self"); } catch (e1) {}
+        try { window.close(); } catch (e2) {}
+        try { location.replace("about:blank"); } catch (e3) {}
       }, 1200);
     } catch (eDelay) {}
   }
