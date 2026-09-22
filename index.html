@@ -7,249 +7,563 @@
 <title>PS4JB</title>
 <style>
   html, body {
-    margin:0; padding:0; height:100%;
-    background:#000;
-    color:#2a9fff;
-    font:15px/1.45 "Segoe UI", system-ui, sans-serif;
-    overflow-x:hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #000;
+    color: #2a9fff;
+    font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
+    overflow-x: hidden;
   }
   #bg {
-    position:fixed; top:0; right:0; bottom:0; left:0; z-index:0;
-    background:#000 url("ps-logo.jpg") center center no-repeat;
-    background-size:cover;
-    pointer-events:none;
+    position: fixed;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: 0;
+    background: #000 url("ps-logo.jpg") center center no-repeat;
+    background-size: cover;
+    pointer-events: none;
   }
   #bg:after {
-    content:"";
-    position:absolute; top:0; right:0; bottom:0; left:0;
-    background:rgba(0,0,0,0.55);
-    pointer-events:none;
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(0,0,0,0.55);
+    pointer-events: none;
   }
-  #brand, #wrap, #foot {
-    position:relative; z-index:2;
-  }
-  #brand {
-    text-align:center; padding:28px 12px 8px;
-    background:transparent; border:none;
-  }
-  #brand-sub {
-    margin:8px 0 0;
-    font-size:14px;
-    font-weight:600;
-    letter-spacing:.12em;
-    color:#ffffff;
-    text-shadow:0 0 10px rgba(255,255,255,.35);
+  #main {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 28px 20px 80px;
+    box-sizing: border-box;
+    max-width: 420px;
+    width: 100%;
   }
   #brand-title {
-    font-size:16px; font-weight:700; letter-spacing:.28em;
-    text-transform:uppercase; color:#2a9fff; margin:0;
-    text-shadow:0 0 18px rgba(42,159,255,.45);
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #2a9fff;
+    text-shadow: 0 0 18px rgba(42,159,255,0.45);
   }
-  #wrap {
-    padding:18px 20px 16px; max-width:520px; margin:0 auto;
-    text-align:center;
+  #brand-sub {
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.35);
   }
-  #state {
-    font-size:28px; font-weight:800; margin:18px 0 10px;
-    letter-spacing:.03em; color:#2a9fff;
-    text-shadow:0 0 22px rgba(42,159,255,.4);
+  #fwMeta {
+    margin: 10px 0 0;
+    color: #9ad2ff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
   }
-  #det { font-size:14px; color:#5eb6ff; margin:0 0 6px; }
-  #det b { color:#9ad2ff; font-weight:600; }
   #cache {
-    font-size:12px; color:#4a9fd8; margin:0 0 14px; min-height:14px;
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #4a9fd8;
+    min-height: 14px;
   }
-  #cache.cacheok { color:#5eb6ff; }
-  .ok { color:#5eb6ff; } .bad { color:#5eb6ff; } .warn { color:#2a9fff; }
+  #cache.cacheok { color: #5eb6ff; }
+  #stage {
+    display: none;
+    margin: 16px 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: left;
+    text-shadow: 0 0 14px rgba(255,255,255,0.4);
+    width: 100%;
+  }
+  #stage.on { display: block; }
+  #stage.ok {
+    color: #22c55e;
+    text-shadow: 0 0 14px rgba(34,197,94,0.55);
+  }
+  #stage.bad {
+    color: #ef4444;
+    text-shadow: 0 0 14px rgba(239,68,68,0.55);
+  }
+  #progress-wrap {
+    display: none;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 420px;
+    margin: 8px 0 8px;
+    height: 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    overflow: hidden;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.12);
+  }
+  #progress-wrap.on { display: block; }
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e8e8e8, #ffffff, #f5f5f5);
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
+    -webkit-transition: background 0.35s ease, box-shadow 0.35s ease;
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+  #progress-pct {
+    display: none;
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ffffff;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
+    margin: 0 0 6px;
+    width: 100%;
+  }
+  #progress-pct.on { display: block; }
+  #elapsed {
+    display: none;
+    position: relative;
+    z-index: 2;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #e5e5e5;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    margin: 0 0 10px;
+    width: 100%;
+  }
+  #elapsed.on { display: block; }
+  #successMsg {
+    display: none;
+    position: relative;
+    z-index: 2;
+    margin: 10px 0 0;
+    padding: 0;
+    max-width: 100%;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #22c55e;
+    text-align: left;
+    text-shadow: 0 0 16px rgba(34, 197, 94, 0.45);
+    width: 100%;
+  }
+  #successMsg .check {
+    display: inline-block;
+    width: 16px;
+    height: 9px;
+    margin: 0 10px 3px 0;
+    border-left: 3px solid #2a9fff;
+    border-bottom: 3px solid #2a9fff;
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    vertical-align: middle;
+    box-shadow: none;
+    text-shadow: none;
+    color: transparent;
+  }
+  body.done #successMsg { display: block !important; }
+  body.done #stage { display: none !important; }
+  body.done #progress-bar {
+    background: linear-gradient(90deg, #15803d, #22c55e, #86efac) !important;
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.55) !important;
+  }
+  body.done #progress-pct { color: #86efac !important; }
+  body.done #elapsed { color: #86efac !important; }
+  body.fail #progress-bar {
+    background: linear-gradient(90deg, #991b1b, #ef4444, #fca5a5) !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.55) !important;
+  }
+  body.fail #progress-pct { color: #fca5a5 !important; }
+  body.fail #elapsed { color: #fca5a5 !important; }
+  body.fail #stage {
+    display: block !important;
+    color: #ef4444 !important;
+    text-shadow: 0 0 14px rgba(239,68,68,0.55) !important;
+  }
+  #msg, #spin, #wrap, #state, #out { display: none; }
+  body.log #wrap, body.log #state, body.log #out { display: block; }
+  body.log #progress-wrap,
+  body.log #progress-pct,
+  body.log #elapsed,
+  body.log #stage,
+  body.log #successMsg { display: none !important; }
+  body.log #wrap { padding: 14px 18px; width: 100%; max-width: none; }
+  body.log #state {
+    font-size: 22px; font-weight: 700; margin: 0 0 8px; color: #2a9fff;
+  }
+  body.log #out {
+    white-space: pre-wrap;
+    font: 12px/1.45 Consolas, monospace;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(42,159,255,0.35);
+    border-radius: 5px;
+    padding: 10px 12px;
+    height: calc(100vh - 160px);
+    overflow-y: auto;
+    color: #9ad2ff;
+  }
   #foot {
-    position:fixed; left:0; right:0; bottom:10px; text-align:center;
-    font-size:12px; color:#2a9fff; letter-spacing:.08em;
-    pointer-events:none; line-height:1.5;
-    text-shadow:0 0 12px rgba(42,159,255,.35);
-    z-index:2;
+    position: fixed;
+    left: 0; right: 0; bottom: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #ffffff;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+    line-height: 1.5;
+    text-shadow: 0 0 12px rgba(255,255,255,0.35);
+    z-index: 2;
   }
-  #foot b { color:#2a9fff; font-weight:600; }
-  #state.blocked {
-    color:#ff6473;
-    font-size:22px;
-    text-shadow:0 0 12px rgba(255,100,115,.35);
-  }
+  #foot b { color: #ffffff; font-weight: 600; }
   body.device-blocked #cache,
-  body.device-blocked #det { display:none !important; }
+  body.device-blocked #progress-wrap,
+  body.device-blocked #progress-pct,
+  body.device-blocked #elapsed,
+  body.device-blocked #stage,
+  body.device-blocked #successMsg,
+  body.device-blocked #fwMeta { display: none !important; }
+  #brand-sub.blocked {
+    color: #ff6473;
+    text-shadow: 0 0 12px rgba(255,100,115,0.35);
+  }
 </style>
 </head>
 <body>
 <div id="bg" aria-hidden="true"></div>
-<div id="brand">
+<div id="main">
   <p id="brand-title">PS4JB</p>
-  <p id="brand-sub">6.00–12.02 &middot; 12.50–13.52</p>
-</div>
-<div id="wrap">
-  <div id="state">detecting firmware...</div>
-  <div id="det"></div>
+  <p id="brand-sub">6.00–12.02 · 12.50–13.52</p>
+  <p id="fwMeta">detecting firmware...</p>
   <div id="cache"></div>
+  <div id="stage">Jailbreak in progress</div>
+  <div id="progress-wrap" aria-hidden="true"><div id="progress-bar"></div></div>
+  <div id="progress-pct">0%</div>
+  <div id="elapsed">Elapsed 0:00</div>
+  <div id="successMsg"><span class="check" aria-hidden="true"></span>Jailbreak completed successfully. You can close the browser now.</div>
+  <div id="spin"></div>
+  <div id="msg"></div>
+  <div id="wrap">
+    <div id="state"></div>
+    <div id="out"></div>
+  </div>
 </div>
+<div id="foot"><b>Created by X-F1REBALL-X</b></div>
 
 <script src="device.js?v=1"></script>
 <script>
 (function () {
-    var stateEl = document.getElementById("state");
-    var detEl = document.getElementById("det");
-    var cacheEl = document.getElementById("cache");
-    function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
-    function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
+  var cacheEl = document.getElementById("cache");
+  var fwMeta = document.getElementById("fwMeta");
+  var brandSub = document.getElementById("brand-sub");
+  var stageEl = document.getElementById("stage");
+  var wrapBar = document.getElementById("progress-wrap");
+  var pctEl = document.getElementById("progress-pct");
+  var elapsedEl = document.getElementById("elapsed");
+  var jbStarted = false;
 
-    function getParam(name) {
-        var q = location.search || "";
-        if (q.charAt(0) === "?") q = q.substring(1);
-        var parts = q.split("&");
-        for (var i = 0; i < parts.length; i++) {
-            var kv = parts[i].split("=");
-            if (decodeURIComponent(kv[0]) === name) {
-                return kv.length > 1 ? decodeURIComponent(kv[1]) : "";
-            }
-        }
-        return null;
+  function setCache(t, ok) {
+    if (!cacheEl) return;
+    cacheEl.textContent = t || "";
+    cacheEl.className = ok ? "cacheok" : "";
+  }
+
+  function getParam(name) {
+    var q = location.search || "";
+    if (q.charAt(0) === "?") q = q.substring(1);
+    var parts = q.split("&");
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split("=");
+      if (decodeURIComponent(kv[0]) === name) {
+        return kv.length > 1 ? decodeURIComponent(kv[1]) : "";
+      }
     }
+    return null;
+  }
 
-    var ROUTES = [
-        { min: 600, max: 669, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
-        { min: 670, max: 672, target: "chains/badhoist/index.html", label: "BadHoist", proven: false },
-        { min: 700, max: 1102, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
-        { min: 1103, max: 1202, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
-        { min: 1250, max: 1300, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
-        { min: 1302, max: 1352, target: "jb.html", label: "Relapse", proven: true,
-          only: { 1302: 1, 1304: 1, 1350: 1, 1352: 1 } }
-    ];
+  var ROUTES = [
+    { min: 600, max: 669, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
+    { min: 670, max: 672, target: "chains/badhoist/index.html", label: "BadHoist", proven: false },
+    { min: 700, max: 1102, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
+    { min: 1103, max: 1202, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
+    { min: 1250, max: 1300, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
+    { min: 1302, max: 1352, target: "same", label: "Relapse", proven: true,
+      only: { 1302: 1, 1304: 1, 1350: 1, 1352: 1 } }
+  ];
 
-    var ua = navigator.userAgent || "";
-    var isPs4 = /PlayStation\s+4/i.test(ua);
-    if (!isPs4) {
-        document.body.className = (document.body.className || "") + " device-blocked";
-        function showBlocked(device) {
-            setState(device + " — not supported", "blocked");
-            if (detEl) detEl.textContent = "";
-            if (cacheEl) cacheEl.textContent = "";
+  var ua = navigator.userAgent || "";
+  var isPs4 = /PlayStation\s+4/i.test(ua);
+  if (!isPs4) {
+    document.body.className = (document.body.className || "") + " device-blocked";
+    function showBlocked(device) {
+      if (brandSub) {
+        brandSub.textContent = device + " — not supported";
+        brandSub.className = "blocked";
+      }
+      if (fwMeta) fwMeta.textContent = "";
+      setCache("");
+    }
+    showBlocked(typeof detectDeviceFromUa === "function" ? detectDeviceFromUa(ua) : "Unknown device");
+    if (typeof resolveDeviceLabel === "function") resolveDeviceLabel(ua, showBlocked);
+    return;
+  }
+
+  var key = null, fwnum = null;
+  var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(ua);
+  if (m) {
+    var ms = parseInt(m[2], 16).toString(16);
+    if (ms.length < 2) ms = "0" + ms;
+    key = m[1] + "." + ms;
+    fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
+  }
+  var fromQ = getParam("fw");
+  if (fromQ && /^\d+\.\d+$/.test(fromQ)) key = fromQ;
+
+  function pickRoute(n) {
+    if (n === null) return null;
+    for (var i = 0; i < ROUTES.length; i++) {
+      var r = ROUTES[i];
+      if (n < r.min || n > r.max) continue;
+      if (r.only && !r.only[n]) continue;
+      return r;
+    }
+    return null;
+  }
+
+  var forced = getParam("force") === "1";
+  var forceChain = getParam("chain");
+  var route = pickRoute(fwnum);
+  if (forceChain === "cssfontface") route = { target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false };
+  else if (forceChain === "psfree") route = { target: "chains/psfree-lapse/index.html", label: "PSFree+Lapse", proven: false };
+  else if (forceChain === "slopkit") route = { target: "chains/slopkit/index.html", label: "Slopkit", proven: false };
+  else if (forceChain === "relapse") route = { target: "same", label: "Relapse", proven: true };
+  else if (forceChain === "badhoist") route = { target: "chains/badhoist/index.html", label: "BadHoist", proven: false };
+
+  var supported = forced || route !== null;
+  if (fwMeta) {
+    var bits = "FW " + (key || "?");
+    if (route) bits += " · " + route.label;
+    fwMeta.textContent = bits;
+  }
+  window.__ps4jbFw = key;
+
+  function isSamePage(r) {
+    if (!r) return true; // forced unknown -> try Relapse on this page
+    return !r.target || r.target === "same" || r.target === "jb.html";
+  }
+
+  function chainUrl(r) {
+    var target = (r && r.target && r.target !== "same") ? r.target : "jb.html";
+    var q = location.search || "";
+    target = target + q;
+    if (key) target += (target.indexOf("?") >= 0 ? "&" : "?") + "fw=" + encodeURIComponent(key);
+    return target;
+  }
+
+  function startProgress() {
+    if (wrapBar) wrapBar.className = "on";
+    if (pctEl) pctEl.className = "on";
+    if (elapsedEl) elapsedEl.className = "on";
+    if (stageEl) {
+      stageEl.textContent = "Jailbreak in progress";
+      stageEl.className = "on";
+    }
+    if (cacheEl) cacheEl.style.display = "none";
+
+    var bar = document.getElementById("progress-bar");
+    var pct = document.getElementById("progress-pct");
+    if (!bar || !pct) return;
+    var value = 0;
+    var finished = false;
+    var t0 = Date.now();
+    window.__ps4jbT0 = t0;
+    var elapsedTimer = 0;
+    function formatElapsed(ms) {
+      var s = Math.floor(ms / 1000);
+      var m = Math.floor(s / 60);
+      s = s % 60;
+      return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+    function paint(v) {
+      if (v < 0) v = 0;
+      if (v > 100) v = 100;
+      value = v;
+      bar.style.width = v + "%";
+      pct.textContent = Math.floor(v) + "%";
+    }
+    function stopElapsed() {
+      if (elapsedTimer) {
+        try { clearInterval(elapsedTimer); } catch (e) {}
+        elapsedTimer = 0;
+      }
+      window.__ps4jbElapsedMs = Date.now() - t0;
+    }
+    function startElapsed() {
+      if (elapsedTimer || !elapsedEl) return;
+      elapsedEl.textContent = "Elapsed 0:00";
+      elapsedTimer = setInterval(function () {
+        if (!elapsedEl) return;
+        elapsedEl.textContent = "Elapsed " + formatElapsed(Date.now() - t0);
+      }, 250);
+    }
+    function complete() {
+      if (finished) return;
+      finished = true;
+      try { clearInterval(timer); } catch (e) {}
+      stopElapsed();
+      if (wrapBar) wrapBar.style.display = "block";
+      if (pct) pct.style.display = "block";
+      var from = value;
+      var start = Date.now();
+      var anim = setInterval(function () {
+        var p = Math.min(1, (Date.now() - start) / 900);
+        paint(from + (100 - from) * p);
+        if (p >= 1) {
+          try { clearInterval(anim); } catch (e3) {}
+          paint(100);
         }
-        showBlocked(typeof detectDeviceFromUa === "function" ? detectDeviceFromUa(ua) : "Unknown device");
-        if (typeof resolveDeviceLabel === "function") resolveDeviceLabel(ua, showBlocked);
+      }, 30);
+    }
+    function fail() {
+      if (finished) return;
+      finished = true;
+      try { clearInterval(timer); } catch (e) {}
+      stopElapsed();
+      if (wrapBar) wrapBar.style.display = "block";
+      if (pct) pct.style.display = "block";
+      try {
+        document.body.classList.remove("done");
+        document.body.classList.add("fail");
+      } catch (eB) {}
+      paint(100);
+    }
+    window.__ps4jbProgressComplete = complete;
+    window.__ps4jbProgressFail = fail;
+    startElapsed();
+    var timer = setInterval(function () {
+      if (finished) return;
+      var cls = document.body.className || "";
+      if (cls.indexOf("done") !== -1) {
+        complete();
         return;
-    }
+      }
+      if (cls.indexOf("fail") !== -1) {
+        fail();
+        return;
+      }
+      var sec = (Date.now() - t0) / 1000;
+      // Same curve as sjb: ~10s to near-full, soft-cap ~94%.
+      var target = 94 * (1 - Math.exp(-sec / 4.2));
+      if (target > value + 0.2) paint(target);
+      if (sec > 180 && stageEl) {
+        stageEl.textContent = "Jailbreak failed - restart your console";
+        stageEl.className = "on bad";
+        fail();
+      }
+    }, 80);
+  }
 
-    var key = null, fwnum = null;
-    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(ua);
-    if (m) {
-        var ms = parseInt(m[2], 16).toString(16);
-        if (ms.length < 2) ms = "0" + ms;
-        key = m[1] + "." + ms;
-        fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
-    }
+  function startRelapse() {
+    if (jbStarted) return;
+    jbStarted = true;
+    startProgress();
+    var s = document.createElement("script");
+    s.type = "module";
+    s.src = "jb.js?v=23";
+    s.onerror = function () {
+      if (stageEl) {
+        stageEl.textContent = "Jailbreak failed - restart your console";
+        stageEl.className = "on bad";
+      }
+      if (typeof window.__ps4jbProgressFail === "function") window.__ps4jbProgressFail();
+    };
+    document.body.appendChild(s);
+  }
 
-    function pickRoute(n) {
-        if (n === null) return null;
-        for (var i = 0; i < ROUTES.length; i++) {
-            var r = ROUTES[i];
-            if (n < r.min || n > r.max) continue;
-            if (r.only && !r.only[n]) continue;
-            return r;
-        }
-        return null;
-    }
-
-    var forced = getParam("force") === "1";
-    var forceChain = getParam("chain");
-    var route = pickRoute(fwnum);
-    if (forceChain === "cssfontface") route = { target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false };
-    else if (forceChain === "psfree") route = { target: "chains/psfree-lapse/index.html", label: "PSFree+Lapse", proven: false };
-    else if (forceChain === "slopkit") route = { target: "chains/slopkit/index.html", label: "Slopkit", proven: false };
-    else if (forceChain === "relapse") route = { target: "jb.html", label: "Relapse", proven: true };
-    else if (forceChain === "badhoist") route = { target: "chains/badhoist/index.html", label: "BadHoist", proven: false };
-
-    var supported = forced || route !== null;
-    var detBits = "firmware <b>" + (key || "unknown") + "</b>";
-    if (route) {
-        detBits += " &middot; <b>" + route.label + "</b>";
-        if (!route.proven) detBits += " &middot; untested on this host";
-        else detBits += " &middot; <b>supported</b>";
-    } else {
-        detBits += " &middot; no chain for this FW in phase 1";
-    }
-    detEl.innerHTML = detBits;
-
-    var target = (route ? route.target : "jb.html") + (location.search || "");
-    if (key) {
-        target += (target.indexOf("?") >= 0 ? "&" : "?") + "fw=" + encodeURIComponent(key);
-    }
-
-    function go() {
-        setState("loading...", "warn");
-        location.replace(target);
-    }
-
+  function go() {
     if (!supported) {
-        setState("no chain for this firmware", "blocked");
-        return;
+      if (brandSub) {
+        brandSub.textContent = "no chain for this firmware";
+        brandSub.className = "blocked";
+      }
+      return;
     }
+    if (isSamePage(route) || forced) {
+      startRelapse();
+      return;
+    }
+    // Other FW chains still live in their own folders (different scripts).
+    location.replace(chainUrl(route));
+  }
 
-    var ac = window.applicationCache;
-    if (!ac || !document.documentElement.getAttribute("manifest")) {
-        go();
-    } else if (!navigator.onLine) {
-        setCache("offline -- from cache", true);
-        go();
-    } else if (ac.status === ac.IDLE) {
-        setCache("cached", true);
-        go();
-    } else if (ac.status === ac.UPDATEREADY) {
-        try { ac.swapCache(); } catch (e) {}
-        setCache("update downloaded", true);
-        location.reload();
-    } else {
-        setCache("checking cache...");
-        var started = false;
-        function startOnce() {
-            if (started) return;
-            started = true;
-            go();
-        }
-        setTimeout(function () {
-            if (!started) {
-                setCache("cache timeout -- continue");
-                startOnce();
-            }
-        }, 8000);
-        ac.addEventListener("downloading",
-            function () { setCache("caching for offline (first run)..."); }, false);
-        ac.addEventListener("progress", function (e) {
-            if (e && e.total)
-                setCache("caching " + Math.round((e.loaded / e.total) * 100) + "%");
-        }, false);
-        ac.addEventListener("cached", function () {
-            setCache("cached for offline use", true);
-            startOnce();
-        }, false);
-        ac.addEventListener("updateready", function () {
-            try { ac.swapCache(); } catch (e) {}
-            setCache("update downloaded", true);
-            location.reload();
-        }, false);
-        ac.addEventListener("noupdate", function () {
-            setCache("cached -- offline ready", true);
-            startOnce();
-        }, false);
-        ac.addEventListener("error", function () {
-            setCache("cache unavailable");
-            startOnce();
-        }, false);
-        ac.addEventListener("obsolete", function () {
-            setCache("cache obsolete");
-            startOnce();
-        }, false);
+  var ac = window.applicationCache;
+  if (!ac || !document.documentElement.getAttribute("manifest")) {
+    go();
+  } else if (!navigator.onLine) {
+    setCache("offline -- from cache", true);
+    go();
+  } else if (ac.status === ac.IDLE) {
+    setCache("cached", true);
+    go();
+  } else if (ac.status === ac.UPDATEREADY) {
+    try { ac.swapCache(); } catch (e) {}
+    setCache("update downloaded", true);
+    location.reload();
+  } else {
+    setCache("checking cache...");
+    var started = false;
+    function startOnce() {
+      if (started) return;
+      started = true;
+      go();
     }
+    setTimeout(function () {
+      if (!started) {
+        setCache("cache timeout -- continue");
+        startOnce();
+      }
+    }, 8000);
+    ac.addEventListener("downloading",
+      function () { setCache("caching for offline (first run)..."); }, false);
+    ac.addEventListener("progress", function (e) {
+      if (e && e.total)
+        setCache("caching " + Math.round((e.loaded / e.total) * 100) + "%");
+    }, false);
+    ac.addEventListener("cached", function () {
+      setCache("cached for offline use", true);
+      startOnce();
+    }, false);
+    ac.addEventListener("updateready", function () {
+      try { ac.swapCache(); } catch (e) {}
+      setCache("update downloaded", true);
+      location.reload();
+    }, false);
+    ac.addEventListener("noupdate", function () {
+      setCache("cached -- offline ready", true);
+      startOnce();
+    }, false);
+    ac.addEventListener("error", function () {
+      setCache("cache unavailable");
+      startOnce();
+    }, false);
+    ac.addEventListener("obsolete", function () {
+      setCache("cache obsolete");
+      startOnce();
+    }, false);
+  }
 })();
 </script>
-<div id="foot">
-  <b>Created by X-F1REBALL-X</b>
-</div>
 </body>
 </html>
