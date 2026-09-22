@@ -61,7 +61,7 @@ function finishUI(ok) {
   } catch (eProg) {}
   var text = ok
     ? "Jailbreak completed successfully"
-    : "Jailbreak failed — try refresh. If it fails again, restart the console";
+    : "Jailbreak failed - restart your console";
   var stage = document.getElementById("stage");
   if (stage) {
     stage.textContent = text;
@@ -95,32 +95,10 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Must leave the browser after success — staying open can kernel-panic.
-    // PS4 often ignores a single window.close(); retry until it closes.
-    forceCloseBrowser();
+    // Close the browser window/tab after success (PS4 may ignore; try anyway).
+    try { window.close(); } catch (eClose) {}
   }
 }
-
-function forceCloseBrowser() {
-  // Close the browser window only — never about:blank.
-  function tryClose() {
-    try { window.close(); } catch (e1) {}
-    try { self.close(); } catch (e2) {}
-    try {
-      var w = window.open("", "_self");
-      if (w) w.close();
-    } catch (e3) {}
-  }
-  tryClose();
-  var n = 0;
-  var id = setInterval(function () {
-    n++;
-    tryClose();
-    if (n >= 40) clearInterval(id);
-  }, 50);
-}
-
-
 
 function mark(tag, detail) {
   const raw = detail;
@@ -3203,18 +3181,9 @@ let allDone = false,
                   plDone = rc === 0 && handle.hi >>> 0 > 0;
                   payloadRunning = plDone;
                   if (plDone) {
-                    // Short settle so GoldHEN can show, then close (no port polling —
-                    // probes slowed GoldHEN to ~30s).
-                    await new Promise(function (r) {
-                      setTimeout(r, 3000);
-                    });
                     try {
-                      forceCloseBrowser();
                       finishUI(true);
                     } catch (eEarlyUI) {}
-                    // Stop here — more JS (ps4debug / teardown) blocks window.close
-                    // and can panic. finally still runs and will short-circuit.
-                    return;
                   }
                   mark(
                     "PAYLOAD-RUN",
@@ -3519,55 +3488,48 @@ let allDone = false,
     mark("THREW", e && e.message ? e.message : String(e));
     state("threw", "bad");
   } finally {
-    // Success: leave the browser immediately. Teardown after GoldHEN
-    // keeps the page alive and blocks window.close.
-    if (payloadRunning) {
-      // Close already ran after GoldHEN settle delay; do not close again early.
-      try { finishUI(true); } catch (eUI) {}
-    } else {
-      try {
-        if (jbRestoreHook) jbRestoreHook("finally");
-      } catch (e5) {
-        mark("JB-RESTORE-THREW", (e5 && e5.message) || String(e5));
-      }
-      try {
-        if (opened.length && closeFd && mainArmed) {
-          let n = 0;
-          for (const fd of opened) if (closeFd(fd) === 0) n++;
-          mark("STRAGGLERS-CLOSED", n + "/" + opened.length);
-        }
-      } catch (e3) {
-        mark("CLOSE-THREW", (e3 && e3.message) || String(e3));
-      }
-      try {
-        if (pinRestore) pinRestore();
-      } catch (e4) {
-        mark("PIN-RESTORE-THREW", (e4 && e4.message) || String(e4));
-      }
-      try {
-        if (mainArmed && mainMf && mainOrig && p) {
-          p.write8(mainMf, mainOrig);
-          mainArmed = false;
-          mark("EXPM1-RESTORED", "expm1(1)=" + Math.expm1(1));
-        }
-      } catch (e2) {
-        mark("DISARM-THREW", (e2 && e2.message) || String(e2));
-      }
-
-      try {
-        if (typeof A !== "undefined" && A) A.busy = 0;
-      } catch (e) {}
-      mark(
-        "PROOF-SUMMARY-FINAL",
-        "pass=" +
-          passCount +
-          " fail=" +
-          failCount +
-          (allDone ? "" : "  INCOMPLETE"),
-      );
-      try {
-        finishUI(false);
-      } catch (eUI) {}
+    try {
+      if (jbRestoreHook) jbRestoreHook("finally");
+    } catch (e5) {
+      mark("JB-RESTORE-THREW", (e5 && e5.message) || String(e5));
     }
+    try {
+      if (opened.length && closeFd && mainArmed) {
+        let n = 0;
+        for (const fd of opened) if (closeFd(fd) === 0) n++;
+        mark("STRAGGLERS-CLOSED", n + "/" + opened.length);
+      }
+    } catch (e3) {
+      mark("CLOSE-THREW", (e3 && e3.message) || String(e3));
+    }
+    try {
+      if (pinRestore) pinRestore();
+    } catch (e4) {
+      mark("PIN-RESTORE-THREW", (e4 && e4.message) || String(e4));
+    }
+    try {
+      if (mainArmed && mainMf && mainOrig && p) {
+        p.write8(mainMf, mainOrig);
+        mainArmed = false;
+        mark("EXPM1-RESTORED", "expm1(1)=" + Math.expm1(1));
+      }
+    } catch (e2) {
+      mark("DISARM-THREW", (e2 && e2.message) || String(e2));
+    }
+
+    try {
+      if (typeof A !== "undefined" && A) A.busy = 0;
+    } catch (e) {}
+    mark(
+      "PROOF-SUMMARY-FINAL",
+      "pass=" +
+        passCount +
+        " fail=" +
+        failCount +
+        (allDone ? "" : "  INCOMPLETE"),
+    );
+    try {
+      finishUI(payloadRunning);
+    } catch (eUI) {}
   }
 })();
