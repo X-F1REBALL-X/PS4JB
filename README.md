@@ -35,8 +35,6 @@ DNS by **Nomadic** — blocks official system updates.
 
 ### 2. Browser
 
-After the first online visit, AppCache stores the host (all chains + offsets) so you can jailbreak offline.
-
 1. Open the PS4 Internet Browser.
 2. Clear Cookies and Clear Cache (Options menu).
 3. Open: https://x-f1reball-x.github.io/PS4JB/
