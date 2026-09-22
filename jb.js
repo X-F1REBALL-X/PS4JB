@@ -3157,24 +3157,12 @@ let allDone = false,
                   keepAlive.push(thr);
                   new Uint8Array(thr).fill(0);
                   const thrAddr = bufAddr(thr);
-                  // Hit 100% + success text a moment BEFORE GoldHEN starts.
+                  // Smooth bar/pct to 100% just BEFORE GoldHEN starts (no hard snap).
                   try {
                     document.body.classList.remove("fail");
                     document.body.classList.add("done");
                     if (typeof window.__ps4jbProgressComplete === "function") {
                       window.__ps4jbProgressComplete();
-                    }
-                    var barEl = document.getElementById("progress-bar");
-                    if (barEl) {
-                      barEl.className = "finishing";
-                      barEl.style.webkitTransition = "none";
-                      barEl.style.transition = "none";
-                      barEl.style.width = "100%";
-                    }
-                    var pctEl2 = document.getElementById("progress-pct");
-                    if (pctEl2) {
-                      pctEl2.textContent = "100%";
-                      pctEl2.style.color = "#86efac";
                     }
                     var successEl = document.getElementById("successMsg");
                     if (successEl) successEl.style.display = "none";
@@ -3182,7 +3170,7 @@ let allDone = false,
                     if (stageEl2) stageEl2.style.display = "none";
                   } catch (ePreUi) {}
                   await new Promise(function (r) {
-                    setTimeout(r, 0);
+                    setTimeout(r, 750);
                   });
                   const rc = callAddr(expect, [thrAddr, 0, entry, 0]).i32;
                   const tdv = new DataView(thr);
