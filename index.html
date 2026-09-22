@@ -311,9 +311,9 @@
     { min: 600, max: 669, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
     { min: 670, max: 672, target: "chains/badhoist/index.html", label: "BadHoist", proven: false },
     { min: 700, max: 1102, target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false },
-    { min: 1103, max: 1202, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
-    { min: 1250, max: 1300, target: "chains/slopkit/index.html", label: "Slopkit", proven: false },
-    { min: 1302, max: 1352, target: "same", label: "Relapse", proven: true,
+    { min: 1103, max: 1202, target: "chains/slopkit/index.html", label: "Slopkit Lapse", proven: false },
+    { min: 1250, max: 1300, target: "chains/slopkit/index.html", label: "Slopkit Netctrl", proven: false },
+    { min: 1302, max: 1352, target: "same", label: "Slopkit Relapse", proven: true,
       only: { 1302: 1, 1304: 1, 1350: 1, 1352: 1 } }
   ];
 
@@ -361,8 +361,8 @@
   var route = pickRoute(fwnum);
   if (forceChain === "cssfontface") route = { target: "chains/cssfontface/index.html", label: "CSSFontFace+Lapse", proven: false };
   else if (forceChain === "psfree") route = { target: "chains/psfree-lapse/index.html", label: "PSFree+Lapse", proven: false };
-  else if (forceChain === "slopkit") route = { target: "chains/slopkit/index.html", label: "Slopkit", proven: false };
-  else if (forceChain === "relapse") route = { target: "same", label: "Relapse", proven: true };
+  else if (forceChain === "slopkit") route = { target: "chains/slopkit/index.html", label: "Slopkit Lapse", proven: false };
+  else if (forceChain === "relapse") route = { target: "same", label: "Slopkit Relapse", proven: true };
   else if (forceChain === "badhoist") route = { target: "chains/badhoist/index.html", label: "BadHoist", proven: false };
 
   var supported = forced || route !== null;
@@ -574,7 +574,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=34";
+    s.src = "jb.js?v=36";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
