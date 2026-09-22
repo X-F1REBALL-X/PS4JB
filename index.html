@@ -394,7 +394,7 @@
       stageEl.textContent = "Jailbreak in progress";
       stageEl.className = "on";
     }
-    if (cacheEl) cacheEl.style.display = "none";
+    // Keep cache status visible: offline-ready tip after AppCache.
 
     var bar = document.getElementById("progress-bar");
     var pct = document.getElementById("progress-pct");
@@ -574,7 +574,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=38";
+    s.src = "jb.js?v=39";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
@@ -605,14 +605,14 @@
   if (!ac || !document.documentElement.getAttribute("manifest")) {
     go();
   } else if (!navigator.onLine) {
-    setCache("offline -- from cache", true);
+    setCache("Cache ready — you can jailbreak without internet", true);
     go();
   } else if (ac.status === ac.IDLE) {
-    setCache("cached", true);
+    setCache("Cache ready — you can jailbreak without internet", true);
     go();
   } else if (ac.status === ac.UPDATEREADY) {
     try { ac.swapCache(); } catch (e) {}
-    setCache("update downloaded", true);
+    setCache("Cache ready — you can jailbreak without internet", true);
     location.reload();
   } else {
     setCache("checking cache...");
@@ -635,16 +635,16 @@
         setCache("caching " + Math.round((e.loaded / e.total) * 100) + "%");
     }, false);
     ac.addEventListener("cached", function () {
-      setCache("cached for offline use", true);
+      setCache("Cache ready — you can jailbreak without internet", true);
       startOnce();
     }, false);
     ac.addEventListener("updateready", function () {
       try { ac.swapCache(); } catch (e) {}
-      setCache("update downloaded", true);
+      setCache("Cache ready — you can jailbreak without internet", true);
       location.reload();
     }, false);
     ac.addEventListener("noupdate", function () {
-      setCache("cached -- offline ready", true);
+      setCache("Cache ready — you can jailbreak without internet", true);
       startOnce();
     }, false);
     ac.addEventListener("error", function () {
