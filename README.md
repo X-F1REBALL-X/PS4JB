@@ -57,10 +57,10 @@ Thanks:
 - **abc** - PSFree
 - **SpecterDev** / **ChendoChap** - Lapse
 - **jordyidk** - Slopkit
-- **WebKitty** - Relapse / chain packaging (13.02 - 13.52)
+- **raw13g** - Relapse / 13.xx offsets
 - **B4411M** - offsets and patches
 - **SiSTR0** - GoldHEN / HEN
-- **zecoxao** - support
+- **zecoxao** - support / dumps
 - **Yenyen** - support
 - **EchoStretch** - support
 
