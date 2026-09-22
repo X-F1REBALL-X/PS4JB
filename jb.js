@@ -120,62 +120,7 @@ function forceCloseBrowser() {
   }, 50);
 }
 
-function sleepMs(ms) {
-  return new Promise(function (r) {
-    setTimeout(r, ms);
-  });
-}
 
-// When GoldHEN/HEN binloader answers on localhost, it is loaded.
-function probeLocalPort(port, timeoutMs) {
-  return new Promise(function (resolve) {
-    var done = false;
-    var x = null;
-    var timer = setTimeout(function () {
-      if (done) return;
-      done = true;
-      try {
-        if (x) x.abort();
-      } catch (eA) {}
-      resolve(false);
-    }, timeoutMs);
-    try {
-      x = new XMLHttpRequest();
-      x.onreadystatechange = function () {
-        if (!done && x.readyState >= 2) {
-          done = true;
-          clearTimeout(timer);
-          resolve(true);
-        }
-      };
-      x.open("GET", "http://127.0.0.1:" + port + "/?t=" + Date.now(), true);
-      x.send(null);
-    } catch (e) {
-      if (!done) {
-        done = true;
-        clearTimeout(timer);
-        resolve(false);
-      }
-    }
-  });
-}
-
-async function waitUntilGoldHENLoaded() {
-  var ports = [9090, 9021, 9020, 3232];
-  var maxMs = 12000;
-  var start = Date.now();
-  await sleepMs(800);
-  while (Date.now() - start < maxMs) {
-    for (var i = 0; i < ports.length; i++) {
-      if (await probeLocalPort(ports[i], 350)) {
-        await sleepMs(400);
-        return true;
-      }
-    }
-    await sleepMs(200);
-  }
-  return false;
-}
 
 function mark(tag, detail) {
   const raw = detail;
@@ -3258,10 +3203,11 @@ let allDone = false,
                   plDone = rc === 0 && handle.hi >>> 0 > 0;
                   payloadRunning = plDone;
                   if (plDone) {
-                    // Wait until GoldHEN is up, then close the window only.
-                    try {
-                      await waitUntilGoldHENLoaded();
-                    } catch (eWait) {}
+                    // Short settle so GoldHEN can show, then close (no port polling —
+                    // probes slowed GoldHEN to ~30s).
+                    await new Promise(function (r) {
+                      setTimeout(r, 3000);
+                    });
                     try {
                       forceCloseBrowser();
                       finishUI(true);
