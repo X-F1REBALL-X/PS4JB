@@ -128,8 +128,8 @@
   }
   #progress-bar.finishing {
     width: 100% !important;
-    -webkit-transition: width 0.55s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 0.55s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 0.7s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.7s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -528,7 +528,7 @@
       var end0 = Date.now();
       var startV = shownPct;
       function rampDone() {
-        var u = (Date.now() - end0) / 550;
+        var u = (Date.now() - end0) / 700;
         if (u >= 1) {
           paintPct(100, true);
           return;
@@ -574,7 +574,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=39";
+    s.src = "jb.js?v=40";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
