@@ -473,6 +473,8 @@
       }
     }
     function complete() {
+      try { if (timer) clearInterval(timer); } catch (eT) {}
+      try { if (window.__ps4jbRaf) cancelAnimationFrame(window.__ps4jbRaf); } catch (eR) {}
       if (finished) return;
       finished = true;
       stopLoop();
@@ -525,7 +527,7 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=29";
+    s.src = "jb.js?v=30";
     s.onerror = function () {
       if (stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
