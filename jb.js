@@ -3201,6 +3201,10 @@ let allDone = false,
                   plDone = rc === 0 && handle.hi >>> 0 > 0;
                   payloadRunning = plDone;
                   if (plDone) {
+                    // Let GoldHEN finish loading before closing the browser.
+                    await new Promise(function (r) {
+                      setTimeout(r, 2500);
+                    });
                     try {
                       forceCloseBrowser();
                       finishUI(true);
@@ -3515,7 +3519,7 @@ let allDone = false,
     // Success: leave the browser immediately. Teardown after GoldHEN
     // keeps the page alive and blocks window.close.
     if (payloadRunning) {
-      try { forceCloseBrowser(); } catch (eCloseF) {}
+      // Close already ran after GoldHEN settle delay; do not close again early.
       try { finishUI(true); } catch (eUI) {}
     } else {
       try {
