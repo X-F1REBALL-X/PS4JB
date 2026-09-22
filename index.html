@@ -485,7 +485,7 @@
       paintPct(target, false);
       paintElapsed(now);
       if (sec > 180 && stageEl) {
-        stageEl.textContent = "Jailbreak failed - refresh the page";
+        stageEl.textContent = "Jailbreak failed - restart your console";
         stageEl.className = "on bad";
         fail();
       }
@@ -571,10 +571,10 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=32";
+    s.src = "jb.js?v=33";
     s.onerror = function () {
       if (stageEl) {
-        stageEl.textContent = "Jailbreak failed - refresh the page";
+        stageEl.textContent = "Jailbreak failed - restart your console";
         stageEl.className = "on bad";
       }
       if (typeof window.__ps4jbProgressFail === "function") window.__ps4jbProgressFail();
