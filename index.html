@@ -114,8 +114,8 @@
     border-radius: 8px;
     background: linear-gradient(90deg, #e8e8e8, #ffffff, #f5f5f5);
     box-shadow: 0 0 14px rgba(255, 255, 255, 0.45);
-    -webkit-transition: background 0.35s ease, box-shadow 0.35s ease;
-    transition: background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 0.18s linear, background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.18s linear, background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -388,8 +388,11 @@
     var value = 0;
     var finished = false;
     var t0 = Date.now();
+    var lastTick = t0;
+    var rafId = 0;
+    var timer = 0;
     window.__ps4jbT0 = t0;
-    var elapsedTimer = 0;
+
     function formatElapsed(ms) {
       var s = Math.floor(ms / 1000);
       var m = Math.floor(s / 60);
@@ -400,60 +403,33 @@
       if (v < 0) v = 0;
       if (v > 100) v = 100;
       value = v;
-      bar.style.width = v + "%";
+      bar.style.width = v.toFixed(2) + "%";
       pct.textContent = Math.floor(v) + "%";
     }
-    function stopElapsed() {
-      if (elapsedTimer) {
-        try { clearInterval(elapsedTimer); } catch (e) {}
-        elapsedTimer = 0;
+    function paintElapsed(now) {
+      if (!elapsedEl) return;
+      elapsedEl.textContent = "Elapsed " + formatElapsed(now - t0);
+    }
+    function stopLoop() {
+      if (timer) {
+        try { clearInterval(timer); } catch (e) {}
+        timer = 0;
+      }
+      if (rafId && typeof cancelAnimationFrame === "function") {
+        try { cancelAnimationFrame(rafId); } catch (e2) {}
+        rafId = 0;
       }
       window.__ps4jbElapsedMs = Date.now() - t0;
     }
-    function startElapsed() {
-      if (elapsedTimer || !elapsedEl) return;
-      elapsedEl.textContent = "Elapsed 0:00";
-      elapsedTimer = setInterval(function () {
-        if (!elapsedEl) return;
-        elapsedEl.textContent = "Elapsed " + formatElapsed(Date.now() - t0);
-      }, 250);
-    }
-    function complete() {
+    function tick() {
       if (finished) return;
-      finished = true;
-      try { clearInterval(timer); } catch (e) {}
-      stopElapsed();
-      if (wrapBar) wrapBar.style.display = "block";
-      if (pct) pct.style.display = "block";
-      var from = value;
-      var start = Date.now();
-      var anim = setInterval(function () {
-        var p = Math.min(1, (Date.now() - start) / 900);
-        paint(from + (100 - from) * p);
-        if (p >= 1) {
-          try { clearInterval(anim); } catch (e3) {}
-          paint(100);
-        }
-      }, 30);
-    }
-    function fail() {
-      if (finished) return;
-      finished = true;
-      try { clearInterval(timer); } catch (e) {}
-      stopElapsed();
-      if (wrapBar) wrapBar.style.display = "block";
-      if (pct) pct.style.display = "block";
-      try {
-        document.body.classList.remove("done");
-        document.body.classList.add("fail");
-      } catch (eB) {}
-      paint(100);
-    }
-    window.__ps4jbProgressComplete = complete;
-    window.__ps4jbProgressFail = fail;
-    startElapsed();
-    var timer = setInterval(function () {
-      if (finished) return;
+      var now = Date.now();
+      var dt = (now - lastTick) / 1000;
+      if (dt < 0) dt = 0;
+      // Cap catch-up so a long main-thread stall does not snap the bar.
+      if (dt > 0.25) dt = 0.25;
+      lastTick = now;
+
       var cls = document.body.className || "";
       if (cls.indexOf("done") !== -1) {
         complete();
@@ -463,16 +439,72 @@
         fail();
         return;
       }
-      var sec = (Date.now() - t0) / 1000;
-      // Same curve as sjb: ~10s to near-full, soft-cap ~94%.
+
+      var sec = (now - t0) / 1000;
+      // Same sjb curve (~10s to near-full, soft-cap ~94%).
       var target = 94 * (1 - Math.exp(-sec / 4.2));
-      if (target > value + 0.2) paint(target);
+      // Smooth chase — updates every frame so bar+clock move together.
+      var alpha = 1 - Math.exp(-dt / 0.32);
+      if (alpha < 0.08) alpha = 0.08;
+      if (alpha > 1) alpha = 1;
+      paint(value + (target - value) * alpha);
+      paintElapsed(now);
+
       if (sec > 180 && stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
         stageEl.className = "on bad";
         fail();
       }
-    }, 80);
+    }
+    function loop() {
+      tick();
+      if (finished) return;
+      if (typeof requestAnimationFrame === "function") {
+        rafId = requestAnimationFrame(loop);
+      }
+    }
+    function complete() {
+      if (finished) return;
+      finished = true;
+      stopLoop();
+      if (wrapBar) wrapBar.style.display = "block";
+      if (pct) pct.style.display = "block";
+      paintElapsed(Date.now());
+      var from = value;
+      var start = Date.now();
+      var anim = setInterval(function () {
+        var p = Math.min(1, (Date.now() - start) / 900);
+        // ease-out for the final ramp
+        var e = 1 - Math.pow(1 - p, 2);
+        paint(from + (100 - from) * e);
+        if (p >= 1) {
+          try { clearInterval(anim); } catch (e3) {}
+          paint(100);
+        }
+      }, 30);
+    }
+    function fail() {
+      if (finished) return;
+      finished = true;
+      stopLoop();
+      if (wrapBar) wrapBar.style.display = "block";
+      if (pct) pct.style.display = "block";
+      try {
+        document.body.classList.remove("done");
+        document.body.classList.add("fail");
+      } catch (eB) {}
+      paintElapsed(Date.now());
+      paint(100);
+    }
+    window.__ps4jbProgressComplete = complete;
+    window.__ps4jbProgressFail = fail;
+    paint(0);
+    paintElapsed(t0);
+    if (typeof requestAnimationFrame === "function") {
+      rafId = requestAnimationFrame(loop);
+    } else {
+      timer = setInterval(tick, 50);
+    }
   }
 
   function startRelapse() {
