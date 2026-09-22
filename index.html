@@ -123,8 +123,8 @@
   /* CSS-driven fill keeps moving even when exploit blocks the JS thread. */
   #progress-bar.run {
     width: 94% !important;
-    -webkit-transition: width 16s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 16s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 9s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 9s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-bar.finishing {
     width: 100% !important;
@@ -411,9 +411,9 @@
       s = s % 60;
       return m + ":" + (s < 10 ? "0" : "") + s;
     }
-    // Match ~16s CSS fill; soft-cap 94% until success.
+    // Match ~9s CSS fill; soft-cap 94% until success (aligns with real JB time).
     function pctForSec(sec) {
-      var v = 94 * (1 - Math.exp(-sec / 5.8));
+      var v = 94 * (1 - Math.exp(-sec / 3.2));
       if (v < 0) v = 0;
       if (v > 94) v = 94;
       return v;
