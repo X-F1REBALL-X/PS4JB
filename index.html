@@ -185,7 +185,7 @@
     text-shadow: none;
     color: transparent;
   }
-  body.done #successMsg { display: block !important; }
+  body.done #successMsg { display: none !important; }
   body.done #stage { display: none !important; }
   body.done #progress-bar {
     background: linear-gradient(90deg, #15803d, #22c55e, #86efac) !important;
@@ -263,7 +263,7 @@
   <div id="progress-wrap" aria-hidden="true"><div id="progress-bar"></div></div>
   <div id="progress-pct">0%</div>
   <div id="elapsed">Elapsed 0:00</div>
-  <div id="successMsg"><span class="check" aria-hidden="true"></span>Jailbreak completed successfully. You can close the browser now.</div>
+  <div id="successMsg" style="display:none" aria-hidden="true"></div>
   <div id="spin"></div>
   <div id="msg"></div>
   <div id="wrap">
@@ -460,7 +460,7 @@
       paintPct(pctForSec(sec));
       paintElapsed(now);
       if (sec > 180 && stageEl) {
-        stageEl.textContent = "Jailbreak failed - restart your console";
+        stageEl.textContent = "Jailbreak failed - refresh the page";
         stageEl.className = "on bad";
         fail();
       }
@@ -527,10 +527,10 @@
     startProgress();
     var s = document.createElement("script");
     s.type = "module";
-    s.src = "jb.js?v=30";
+    s.src = "jb.js?v=31";
     s.onerror = function () {
       if (stageEl) {
-        stageEl.textContent = "Jailbreak failed - restart your console";
+        stageEl.textContent = "Jailbreak failed - refresh the page";
         stageEl.className = "on bad";
       }
       if (typeof window.__ps4jbProgressFail === "function") window.__ps4jbProgressFail();
