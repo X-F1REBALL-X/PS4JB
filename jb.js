@@ -102,7 +102,12 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    try { window.close(); } catch (eClose) {}
+    // Delay close so the 100% bar + success text can paint before GoldHEN toast.
+    try {
+      setTimeout(function () {
+        try { window.close(); } catch (eClose) {}
+      }, 2500);
+    } catch (eDelay) {}
   }
 }
 
@@ -3163,6 +3168,33 @@ let allDone = false,
                   keepAlive.push(thr);
                   new Uint8Array(thr).fill(0);
                   const thrAddr = bufAddr(thr);
+                  // Hit 100% + success text a moment BEFORE GoldHEN starts.
+                  try {
+                    document.body.classList.remove("fail");
+                    document.body.classList.add("done");
+                    if (typeof window.__ps4jbProgressComplete === "function") {
+                      window.__ps4jbProgressComplete();
+                    }
+                    var barEl = document.getElementById("progress-bar");
+                    if (barEl) {
+                      barEl.className = "finishing";
+                      barEl.style.webkitTransition = "none";
+                      barEl.style.transition = "none";
+                      barEl.style.width = "100%";
+                    }
+                    var pctEl2 = document.getElementById("progress-pct");
+                    if (pctEl2) {
+                      pctEl2.textContent = "100%";
+                      pctEl2.style.color = "#86efac";
+                    }
+                    var successEl = document.getElementById("successMsg");
+                    if (successEl) successEl.style.display = "block";
+                    var stageEl2 = document.getElementById("stage");
+                    if (stageEl2) stageEl2.style.display = "none";
+                  } catch (ePreUi) {}
+                  await new Promise(function (r) {
+                    setTimeout(r, 500);
+                  });
                   const rc = callAddr(expect, [thrAddr, 0, entry, 0]).i32;
                   const tdv = new DataView(thr);
                   const handle = new int64(
