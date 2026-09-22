@@ -102,17 +102,8 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Leave right after success: no about:blank (no white page).
-    // Prefer history.back() so PS4 returns to the browser bookmark tiles.
-    try {
-      setTimeout(function () {
-        try { window.close(); } catch (e1) {}
-        try {
-          if (history.length > 1) history.go(1 - history.length);
-          else history.back();
-        } catch (e2) {}
-      }, 100);
-    } catch (eDelay) {}
+    // Same as before the bar/close experiments: try close right away (no white page).
+    try { window.close(); } catch (eClose) {}
   }
 }
 
@@ -3198,7 +3189,7 @@ let allDone = false,
                     if (stageEl2) stageEl2.style.display = "none";
                   } catch (ePreUi) {}
                   await new Promise(function (r) {
-                    setTimeout(r, 200);
+                    setTimeout(r, 0);
                   });
                   const rc = callAddr(expect, [thrAddr, 0, entry, 0]).i32;
                   const tdv = new DataView(thr);
