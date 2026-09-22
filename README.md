@@ -27,6 +27,12 @@ Router auto-picks the chain by firmware. Override with `?chain=cssfontface|psfre
 3. Wait for success.
 4. If it fails, restart the console and try again.
 
+## Notes
+
+- After success with GoldHEN, turn off **Rest Mode support** in GoldHEN settings. Leaving it on can leave a white light on reboot or shutdown (common on many hosts/FW, not only 13.xx).
+- If it still happens, also turn off FTP and BinLoader, or disconnect the internet before power off.
+- White light = hold Power about 10 seconds to force off, then boot again.
+
 ## Layout
 
 - `index.html` — FW detect, cache, Relapse jailbreak (one page)
