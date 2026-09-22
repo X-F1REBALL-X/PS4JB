@@ -61,7 +61,7 @@ function finishUI(ok) {
   } catch (eProg) {}
   var text = ok
     ? "Jailbreak completed successfully"
-    : "Jailbreak failed - refresh the page";
+    : "Jailbreak failed - restart your console";
   var stage = document.getElementById("stage");
   if (stage) {
     stage.textContent = text;
@@ -72,17 +72,10 @@ function finishUI(ok) {
   if (successMsg) {
     successMsg.style.display = "none";
   }
-  var sub = document.getElementById("brand-sub");
-  if (sub && !stage) {
-    sub.textContent = text;
-    sub.style.display = "block";
-    sub.style.color = "#ffffff";
-  }
   var msg = document.getElementById("msg");
   if (msg) {
-    msg.textContent = text;
-    msg.style.display = ok ? "none" : "block";
-    msg.style.color = "#ffffff";
+    msg.textContent = "";
+    msg.style.display = "none";
   }
   try {
     var meta = document.getElementById("fwMeta") || document.getElementById("jb-meta");
