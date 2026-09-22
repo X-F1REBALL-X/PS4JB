@@ -284,6 +284,24 @@ let allDone = false,
         " src=ps4_offsets.js",
     );
 
+    // Prefetch patch/payload while the exploit runs so the post-JB load is faster.
+    const prefetchBin = (url) =>
+      fetch(url)
+        .then(async (r) => (r && r.ok ? new Uint8Array(await r.arrayBuffer()) : null))
+        .catch(() => null);
+    const kpatchPrefetch = DO_PATCH ? prefetchBin(KPATCH_FILE) : Promise.resolve(null);
+    const payloadPrefetch = DO_PAYLOAD ? prefetchBin(PAYLOAD_FILE) : Promise.resolve(null);
+    // Warm the other common payload too (hen <-> goldhen).
+    try {
+      const other =
+        PAYLOAD_FILE === "hen.bin"
+          ? "goldhen.bin"
+          : PAYLOAD_FILE === "goldhen.bin"
+            ? "hen.bin"
+            : null;
+      if (other) prefetchBin(other);
+    } catch (ePref) {}
+
     // ---- benign-miss auto-retry (reads only, before any kernel write) ----
     // A passA/passB "no crossing" is a recoverable reclaim miss in the READ
     // phase -- no kernel .data/.text has been touched yet, so reloading and
@@ -2607,8 +2625,11 @@ let allDone = false,
             const SITES = [];
             if (DO_PATCH) {
               try {
-                const r = await fetch(KPATCH_FILE);
-                if (r.ok) kpatchBlob = new Uint8Array(await r.arrayBuffer());
+                kpatchBlob = await kpatchPrefetch;
+                if (!kpatchBlob) {
+                  const r = await fetch(KPATCH_FILE);
+                  if (r.ok) kpatchBlob = new Uint8Array(await r.arrayBuffer());
+                }
               } catch (e) {
                 mark("KPATCH-FETCH-THREW", (e && e.message) || String(e));
               }
@@ -2637,8 +2658,11 @@ let allDone = false,
             }
             if (DO_PAYLOAD) {
               try {
-                const r = await fetch(PAYLOAD_FILE);
-                if (r.ok) payloadBlob = new Uint8Array(await r.arrayBuffer());
+                payloadBlob = await payloadPrefetch;
+                if (!payloadBlob) {
+                  const r = await fetch(PAYLOAD_FILE);
+                  if (r.ok) payloadBlob = new Uint8Array(await r.arrayBuffer());
+                }
               } catch (e) {
                 mark("PAYLOAD-FETCH-THREW", (e && e.message) || String(e));
               }
