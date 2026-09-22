@@ -95,9 +95,31 @@ function finishUI(ok) {
     }
   } catch (eMeta) {}
   if (ok) {
-    // Close the browser window/tab after success (PS4 may ignore; try anyway).
-    try { window.close(); } catch (eClose) {}
+    // Must leave the browser after success — staying open can kernel-panic.
+    // PS4 often ignores a single window.close(); retry, then about:blank.
+    forceCloseBrowser();
   }
+}
+
+function forceCloseBrowser() {
+  function tryClose() {
+    try { window.close(); } catch (e1) {}
+    try { self.close(); } catch (e2) {}
+    try {
+      var w = window.open("", "_self");
+      if (w) w.close();
+    } catch (e3) {}
+  }
+  tryClose();
+  var n = 0;
+  var id = setInterval(function () {
+    n++;
+    tryClose();
+    if (n >= 20) {
+      clearInterval(id);
+      try { location.replace("about:blank"); } catch (eBlank) {}
+    }
+  }, 100);
 }
 
 function mark(tag, detail) {
