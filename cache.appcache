@@ -1,11 +1,12 @@
 CACHE MANIFEST
 # ps4jb-cache-wait-1
+# ps4jb-brand-cachehtml-1
 # rev 20260922-continuous-css-fill
 ps-logo.jpg #95cab1d70cad3e48fbf67a5de86ab368a908e46b81c5ee1f547414afb44abf84
 ps-controller-bg.jpg #d373feec02ff0f3dd6992b9f0d5b9c459c09cff64a615d5d558d78db33743fbf
 
 index.html #f86a2ce3cef794518c5c9a48d537fd2b4f57ca74f08a8b395ee970f09a9c8cb1
-cache.html #940a155ce23bc829e0ce370b7f3f4bd0c9de48d2f6854fab21e629f751756ca1
+cache.html #5b70277ffbc0c8c376d1e5c15e65ef311b11ad74eb5a0ebcf6d62436a4bf5897
 jb.html #47b3202cfafc2f4c8865dfc8d5031dd10dd7071abf0a725b6dd232f7248609cd
 logo_raw.png
 ps4-bg.png
