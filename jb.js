@@ -61,7 +61,7 @@ function finishUI(ok) {
   } catch (eProg) {}
   var text = ok
     ? "Jailbreak completed successfully"
-    : "Failed — refresh page, try again";
+    : "Try refresh. If it failed, restart console";
   var stage = document.getElementById("stage");
   if (stage) {
     stage.textContent = text;
