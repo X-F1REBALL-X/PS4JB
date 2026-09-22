@@ -10,13 +10,13 @@ PS4 jailbreak / HEN host.
 
 | Firmware | Chain | Status |
 | --- | --- | --- |
-| 13.02, 13.04, 13.50, 13.52 | Relapse | Working on this host |
+| 13.02, 13.04, 13.50, 13.52 | Slopkit Relapse | Working on this host |
+| 12.50 – 13.00 | Slopkit Netctrl | Auto (untested on this host) |
+| 11.03 – 12.02 | Slopkit Lapse | Auto (untested on this host) |
 | 7.00 – 11.02 | CSSFontFace + Lapse | Auto (untested on this host) |
-| 11.03 – 12.02 | Slopkit | Auto (untested on this host) |
-| 12.50 – 13.00 | Slopkit | Auto (untested on this host) |
-| 6.00 – 6.69 | CSSFontFace + Lapse | Auto (untested on this host) |
-| 6.70 – 6.72 | BadHoist | Entry page (limited) |
 | 7.00 – 9.60 | PSFree + Lapse | `?chain=psfree` (untested) |
+| 6.70 – 6.72 | BadHoist | Entry page (limited) |
+| 6.00 – 6.69 | CSSFontFace + Lapse | Auto (untested on this host) |
 
 Router auto-picks the chain by firmware. Override with `?chain=cssfontface|psfree|slopkit|relapse|badhoist` or `?force=1`.
 
@@ -35,11 +35,11 @@ Router auto-picks the chain by firmware. Override with `?chain=cssfontface|psfre
 
 ## Layout
 
-- `index.html` — FW detect, cache, Relapse jailbreak (one page)
-- `jb.js` — Relapse 13.02–13.52
+- `index.html` — FW detect, cache, Slopkit Relapse jailbreak (one page)
+- `jb.js` — Slopkit Relapse 13.02–13.52
 - `chains/cssfontface/` — CSSFontFace + Lapse/Netctrl
 - `chains/psfree-lapse/` — PSFree + Lapse
-- `chains/slopkit/` — Slopkit Lapse/Netctrl
+- `chains/slopkit/` — Slopkit Lapse (11.xx–12.02) / Netctrl (12.50–13.00)
 - `chains/badhoist/` — assets only
 - `third_party/` — mirrored patches / offsets / licenses
 
