@@ -47,6 +47,23 @@ DNS by **Nomadic** - blocks official system updates.
 3. Wait for success (the page tries to close).
 4. If it fails: Jailbreak failed - restart your console.
 
+## Credits
+
+Thanks:
+
+- **Sleirsgoevy** - BadHoist (6.70 - 6.72)
+- **TheFloW** - NetControl / poops base (Netctrl)
+- **Nathan Fargo** - CSSFontFace
+- **abc** - PSFree
+- **SpecterDev** / **ChendoChap** - Lapse
+- **jordyidk** - Slopkit
+- **WebKitty** - Relapse / chain packaging (13.02 - 13.52)
+- **B4411M** - offsets and patches
+- **SiSTR0** - GoldHEN / HEN
+- **zecoxao** - support
+- **Yenyen** - support
+- **EchoStretch** - support
+
 ## License
 
 See `LICENSE`, `NOTICE`, and `third_party/licenses/`.
