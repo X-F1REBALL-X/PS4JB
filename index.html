@@ -120,16 +120,25 @@
     -webkit-transition: background 0.35s ease, box-shadow 0.35s ease;
     transition: background 0.35s ease, box-shadow 0.35s ease;
   }
-  /* CSS-driven fill keeps moving even when exploit blocks the JS thread. */
+  /* One continuous CSS animation 0→100% — keeps moving if JS stalls (JS-stall safe). */
+  @-webkit-keyframes ps4jb-fill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+  @keyframes ps4jb-fill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
   #progress-bar.run {
-    width: 94% !important;
-    -webkit-transition: width 9s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 9s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-animation: ps4jb-fill 9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    animation: ps4jb-fill 9s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
   }
   #progress-bar.finishing {
+    -webkit-animation: none;
+    animation: none;
     width: 100% !important;
-    -webkit-transition: width 0.7s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
-    transition: width 0.7s cubic-bezier(0.22, 0.08, 0.2, 1), background 0.35s ease, box-shadow 0.35s ease;
+    -webkit-transition: width 0.5s ease-out, background 0.35s ease, box-shadow 0.35s ease;
+    transition: width 0.5s ease-out, background 0.35s ease, box-shadow 0.35s ease;
   }
   #progress-pct {
     display: none;
@@ -411,13 +420,7 @@
       s = s % 60;
       return m + ":" + (s < 10 ? "0" : "") + s;
     }
-    // Match ~9s CSS fill; soft-cap 94% until success (aligns with real JB time).
-    function pctForSec(sec) {
-      var v = 94 * (1 - Math.exp(-sec / 3.2));
-      if (v < 0) v = 0;
-      if (v > 94) v = 94;
-      return v;
-    }
+    // % follows the live CSS bar width (bar keeps animating even if JS stalls).
     var shownPct = 0;
     function readBarPct() {
       try {
@@ -429,19 +432,11 @@
       } catch (eR) {}
       return null;
     }
-    function paintPct(v, snap) {
+    function paintPct(v) {
       if (v < 0) v = 0;
       if (v > 100) v = 100;
-      if (snap) {
-        shownPct = v;
-      } else {
-        // Soft chase so % does not jump after a JS stall.
-        var d = v - shownPct;
-        if (d > 8) shownPct += d * 0.35;
-        else if (d > 0.15) shownPct += d * 0.22;
-        else shownPct = v;
-      }
-      pct.textContent = Math.floor(shownPct + 0.0001) + "%";
+      shownPct = v;
+      pct.textContent = Math.floor(v + 0.0001) + "%";
     }
     function paintElapsed(now) {
       if (!elapsedEl) return;
@@ -462,7 +457,8 @@
       try {
         bar.className = "";
         bar.style.width = "0%";
-        // Force layout so the 0% -> 94% transition actually runs.
+        bar.style.webkitAnimation = "";
+        bar.style.animation = "";
         void bar.offsetWidth;
         bar.className = "run";
       } catch (eCss) {}
@@ -479,15 +475,10 @@
         fail();
         return;
       }
-      var sec = (now - t0) / 1000;
-      var target = pctForSec(sec);
       var fromBar = readBarPct();
-      // Prefer live CSS bar width so % tracks the meter after stalls.
-      if (fromBar != null && fromBar > target) target = fromBar;
-      if (target > 94) target = 94;
-      paintPct(target, false);
+      if (fromBar != null) paintPct(fromBar);
       paintElapsed(now);
-      if (sec > 180 && stageEl) {
+      if ((now - t0) / 1000 > 180 && stageEl) {
         stageEl.textContent = "Jailbreak failed - restart your console";
         stageEl.className = "on bad";
         fail();
@@ -510,34 +501,39 @@
       if (pct) pct.style.display = "block";
       paintElapsed(Date.now());
       try {
-        // Keep current computed width, then ease to 100% (no hard snap).
         var cur = readBarPct();
-        if (cur == null || cur < shownPct) cur = shownPct;
+        if (cur == null) cur = shownPct;
         if (cur < 1) cur = 1;
-        if (cur > 99) cur = 99;
-        bar.className = "";
-        bar.style.webkitTransition = "none";
-        bar.style.transition = "none";
-        bar.style.width = cur + "%";
-        void bar.offsetWidth;
-        bar.style.webkitTransition = "";
-        bar.style.transition = "";
-        bar.className = "finishing";
-      } catch (eF) {}
-      // Ramp % to 100 with the finishing bar.
-      var end0 = Date.now();
-      var startV = shownPct;
-      function rampDone() {
-        var u = (Date.now() - end0) / 700;
-        if (u >= 1) {
-          paintPct(100, true);
-          return;
+        if (cur > 99.5) {
+          paintPct(100);
+          bar.className = "finishing";
+          bar.style.width = "100%";
+        } else {
+          // Continue smoothly from current width to 100% (no mid-bar freeze).
+          bar.className = "";
+          bar.style.webkitAnimation = "none";
+          bar.style.animation = "none";
+          bar.style.width = cur + "%";
+          void bar.offsetWidth;
+          bar.className = "finishing";
+          bar.style.width = "100%";
+          var end0 = Date.now();
+          var startV = cur;
+          function rampDone() {
+            var u = (Date.now() - end0) / 500;
+            if (u >= 1) {
+              paintPct(100);
+              return;
+            }
+            paintPct(startV + (100 - startV) * u);
+            if (typeof requestAnimationFrame === "function") requestAnimationFrame(rampDone);
+            else setTimeout(rampDone, 32);
+          }
+          rampDone();
         }
-        paintPct(startV + (100 - startV) * u, true);
-        if (typeof requestAnimationFrame === "function") requestAnimationFrame(rampDone);
-        else setTimeout(rampDone, 32);
+      } catch (eF) {
+        paintPct(100);
       }
-      rampDone();
     }
     function fail() {
       if (finished) return;
@@ -554,11 +550,11 @@
         bar.style.width = "100%";
       } catch (eF2) {}
       paintElapsed(Date.now());
-      paintPct(100, true);
+      paintPct(100);
     }
     window.__ps4jbProgressComplete = complete;
     window.__ps4jbProgressFail = fail;
-    paintPct(0, true);
+    paintPct(0);
     paintElapsed(t0);
     startCssFill();
     if (typeof requestAnimationFrame === "function") {
