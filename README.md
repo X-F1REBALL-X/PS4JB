@@ -44,8 +44,8 @@ DNS by **Nomadic** — blocks official system updates.
 
 1. Open the favorite / link.
 2. Wait for cache (`Cache ready`), then the jailbreak starts.
-3. Wait for success (the page closes).
-4. If jailbreak failed: try refresh. If it fails again, restart the console.
+3. Wait for success (the page tries to close).
+4. If it fails, restart the console and try again.
 
 ## Layout
 
